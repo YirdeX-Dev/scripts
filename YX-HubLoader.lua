@@ -1026,26 +1026,26 @@ UniversalLeftGroup:AddToggle('AntiFlingToggle', {
         end
     end
 })
-
-
-
-local Toggler = UniversalLeftGroup:AddToggle("MyToggle", {
-    Text = "透视(可在墨水里使用)",
-    Default = true,
-    Callback = function(state)
+ UniversalLeftGroup:AddCheckbox("ESP", {
+    Text = "透视[墨水可用]",
+    Default = false,
+    Callback = function(enabled)
         local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+
         local highlights = {}
         local connections = {}
 
         local function clearHighlights()
-            for _,plr in pairs(Players:GetPlayers()) do
-                local char = plr.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    local hl = char.HumanoidRootPart:FindFirstChild("Highlight")
-                    if hl then hl:Destroy() end
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                    local hl = plr.Character.HumanoidRootPart:FindFirstChild("Highlight")
+                    if hl then
+                        hl:Destroy()
+                    end
                 end
             end
-            for _,conn in pairs(connections) do
+            for _, conn in pairs(connections) do
                 if typeof(conn) == "RBXScriptConnection" then
                     conn:Disconnect()
                 end
@@ -1054,58 +1054,51 @@ local Toggler = UniversalLeftGroup:AddToggle("MyToggle", {
             table.clear(connections)
         end
 
-        if state then
-            local colorPicker = Toggler:AddColorPicker("MyColorPicker", {
-                Default = Color3.new(1, 0, 0),
-                Title = "透视颜色",
-                Transparency = 0,
-                Callback = function(colorVal, transVal)
-                    for _,hl in pairs(highlights) do
-                        if hl and hl.Parent then
-                            hl.FillColor = colorVal
-                            hl.FillTransparency = transVal
-                            hl.OutlineColor = colorVal
-                        end
-                    end
-                end
-            })
-
-            local function createHighlight(player)
+        if enabled then
+            for _, plr in pairs(Players:GetPlayers()) do
                 task.spawn(function()
-                    repeat task.wait() until player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    local root = player.Character.HumanoidRootPart
-                    if root:FindFirstChild("Highlight") then return end
-
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "Highlight"
-                    highlight.Adornee = player.Character
-                    highlight.Parent = root
-                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                    highlight.FillColor = colorPicker.Value
-                    highlight.OutlineColor = colorPicker.Value
-                    highlight.FillTransparency = colorPicker.Transparency
-                    highlights[player] = highlight
+                    repeat task.wait() until plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+                    if not plr.Character.HumanoidRootPart:FindFirstChild("Highlight") then
+                        local highlight = Instance.new("Highlight")
+                        highlight.Name = "Highlight"
+                        highlight.Adornee = plr.Character
+                        highlight.Parent = plr.Character.HumanoidRootPart
+                        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                        highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        highlights[plr] = highlight
+                    end
                 end)
             end
 
-            for _,plr in pairs(Players:GetPlayers()) do
-                createHighlight(plr)
-            end
+            connections["PlayerAdded"] = Players.PlayerAdded:Connect(function(plr)
+                task.spawn(function()
+                    repeat task.wait() until plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+                    if not plr.Character.HumanoidRootPart:FindFirstChild("Highlight") then
+                        local highlight = Instance.new("Highlight")
+                        highlight.Name = "Highlight"
+                        highlight.Adornee = plr.Character
+                        highlight.Parent = plr.Character.HumanoidRootPart
+                        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                        highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        highlights[plr] = highlight
+                    end
+                end)
+            end)
 
-            connections.PlayerAdded = Players.PlayerAdded:Connect(createHighlight)
-            connections.PlayerRemoving = Players.PlayerRemoving:Connect(function(plr)
+            connections["PlayerRemoving"] = Players.PlayerRemoving:Connect(function(plr)
                 if highlights[plr] then
                     highlights[plr]:Destroy()
                     highlights[plr] = nil
                 end
             end)
+
         else
             clearHighlights()
         end
     end
 })
-
-
 UniversalLeftGroup:AddCheckbox("No Shadows", {
     Text = "无阴影",
     Default = false,
