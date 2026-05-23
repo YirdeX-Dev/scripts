@@ -2796,7 +2796,7 @@ AGA:AddButton({
    loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/Msploit"))()
     end
 })
-ACD:AddLabel("Msploit里面内置通用脚本")
+AGA:AddLabel("Msploit里面内置通用脚本")
 
 AGA:AddButton({
     Text = "通用汉化脚本",
