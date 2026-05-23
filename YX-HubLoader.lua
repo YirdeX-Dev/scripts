@@ -207,18 +207,7 @@ AB:AddButton({
 })
     end
 })
-AB:AddButton({
-    Text = "复制YirdeXB站lD",
-    Func = function()
-    setclipboard("UID:3493111925836628")
-       Tooltip = "复制B站lD",
-    Library:Notify({
-    Title = "YirdeX-提示",
-    Description = "复制成功",
-    Time = 2,
-})
-    end
-})
+AGA:AddLabel("--------------------")
 AB:AddButton({
     Text = "复制AF主群",
     Func = function()
