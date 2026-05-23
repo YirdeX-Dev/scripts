@@ -207,7 +207,7 @@ AB:AddButton({
 })
     end
 })
-AGA:AddLabel("--------------------")
+AB:AddLabel("--------------------")
 AB:AddButton({
     Text = "复制AF主群",
     Func = function()
