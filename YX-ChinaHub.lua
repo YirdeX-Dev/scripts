@@ -75,7 +75,7 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 local GlobalEnv = getgenv()
 local FunctionEnv = getfenv()
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/DevSloPo/obsidian_UI/main/Library.lua"))() 
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/obsidian_UI/refs/heads/main/Library.lua"))() 
 local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/obsidian_UI/refs/heads/main/ThemeManager.lua"))() 
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/DevSloPo/obsidian_UI/main/addons/SaveManager.lua"))()
 
@@ -105,8 +105,7 @@ local A9 = game:GetService("HttpService")
 
 local Win = Library:CreateWindow({
 	Title = "YX-脚本中心",
-    Footer = "制作人：YirdeX，此脚本为脚本中心",
-	Icon = 127276339495788,
+    Footer = "汉化中心",
 	  Size = UDim2.fromOffset(750, 650),
     AutoShow = true,
     NotifySide = "Right",
@@ -148,17 +147,9 @@ local Tabs = {
         Description = "界面设置与部分功能",
         Icon = "settings"
     }),
-    C = Win:AddTab({
-        Name = "外部插件",
-        Description = "额外功能加入此脚本",
-        Icon = "boxes"
-    })
-}
-
 
 local AB = Tabs.D:AddRightGroupbox("信息")
 local AA = Tabs.D:AddLeftGroupbox("人员名单","handshake")
-local Addons = Tabs.C:AddLeftGroupbox("插件管理")
 
     Tabs.D:UpdateWarningBox({
         Title = '脚本信息',
@@ -169,6 +160,7 @@ local Addons = Tabs.C:AddLeftGroupbox("插件管理")
     })
 AA:AddLabel("[<font color=\"rgb(0, 255, 0)\">YirdeX</font>]制作者 | 所有者")
 AA:AddLabel("[<font color=\"rgb(0, 255, 0)\">秋词</font>]制作者 | 开发者")
+AA:AddLabel("[<font color=\"rgb(0, 255, 0)\">白枫</font>]测试者")
 
 
 AB:AddButton({
@@ -894,15 +886,6 @@ AGA:AddButton({
     end
 })
 -------------分开-------------
-A22:AddLabel("-------偷走脑红-------")
-
-
-
-
-A22:AddLabel("-------死铁轨-------")
-
-
-
 A22:AddLabel("-------刀刃球-------")
 A22:AddButton({
     Text = "NodeX刀刃剑",
@@ -2377,7 +2360,7 @@ UniversalLeftGroup:AddToggle("BulletTrackingToggle", {Text="通用子弹追踪",
                 bulletTrackingHook = nil;
         end
 end});
-local RotationControlGroup = Tabs.Universal:AddRightGroupbox("旋转控制");
+local RotationControlGroup = Tabs.Universal:AddRightGroupbox("旋转控制(不能在墨水里使用)");
 RotationControlGroup:AddButton({Text="旋转 10",Func=function()
         if (A2 and A2.Character) then
                 local HRP = A2.Character:FindFirstChild("HumanoidRootPart");
@@ -3310,88 +3293,6 @@ UniversalPIAY:AddButton({
 })
 
 -------------分开-------------
-
-Tabs.C:UpdateWarningBox({
-    Title = "警告！",
-    Text = "小心！您放入YX-Hub-插件/Addons目录的任何脚本都会被执行器执行，我们建议您仅使用来自可信来源或开源的插件。对于插件造成的任何损害，我们概不负责，特此警告！",
-    IsNormal = false,
-    Visible = true,
-    LockSize = true,
-})
-local HubFolder = "YX-Hub-插件"
-local addonFolder = HubFolder.."/Addons"
-
-if not isfolder(HubFolder) then
-    makefolder(HubFolder)
-end
-
-if not isfolder(addonFolder) then
-    makefolder(addonFolder)
-end
-
-AddonsFolder = AddonsFolder or {}
-AddonsFolder.Addons = {}
-
-for _, file in ipairs(listfiles(addonFolder)) do
-    if file:sub(-4) == ".lua" or file:sub(-4) == ".txt" then
-        local success, addon = pcall(function()
-            return loadstring(readfile(file))()
-        end)
-        if success and type(addon) == "table" then
-            table.insert(AddonsFolder.Addons, addon)
-            
-            if addon.Text then
-                if addon.Callback then
-                    Addons:AddToggle(addon.Text, {
-                        Text = addon.Text,
-                        Default = addon.Default or false,
-                        Tooltip = addon.Tooltip or "",
-                        Callback = addon.Callback
-                    })
-                elseif addon.Func then
-                    Addons:AddButton({
-                        Text = addon.Text,
-                        Tooltip = addon.Tooltip or "",
-                        Func = addon.Func
-                    })
-                elseif addon.Default and addon.Min and addon.Max and addon.Rounding then
-                    Addons:AddSlider(addon.Text, {
-                        Text = addon.Text,
-                        Default = addon.Default,
-                        Min = addon.Min,
-                        Max = addon.Max,
-                        Rounding = addon.Rounding,
-                        Tooltip = addon.Tooltip or "",
-                        Callback = addon.Callback
-                    })
-                elseif addon.Values then
-                    Addons:AddDropdown(addon.Text, {
-                        Values = addon.Values,
-                        Default = addon.Default or 1,
-                        Multi = addon.Multi or false,
-                        Text = addon.Text,
-                        Tooltip = addon.Tooltip or "",
-                        Searchable = addon.Searchable or false,
-                        Callback = addon.Callback
-                    })
-                elseif addon.Numeric ~= nil then
-                    Addons:AddInput(addon.Text, {
-                        Default = addon.Default or "",
-                        Numeric = addon.Numeric,
-                        Finished = addon.Finished or false,
-                        ClearTextOnFocus = addon.ClearTextOnFocus or false,
-                        Text = addon.Text,
-                        Tooltip = addon.Tooltip or "",
-                        Placeholder = addon.Placeholder or "",
-                        Callback = addon.Callback
-                    })
-                else
-                    Addons:AddLabel(addon.Text)
-                end
-            end
-        end
-    end
-end
 local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("界面设置")
 
 MenuGroup:AddCheckbox("ShowCustomCursor", {
