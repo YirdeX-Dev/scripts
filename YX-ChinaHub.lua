@@ -1,5 +1,13 @@
 --🤓你们搬吧，你们能坚持下来算你们可以
 
+local _env = getfenv()
+
+local function getRoot(char)
+    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso")
+end
+
+local antivoidloop = nil
+
 local function ShowErrorPrompt(title, message, shouldKick)
     local promptCode = [[
         local title, message, shouldKick = ...
@@ -67,17 +75,18 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
   Text = "欢迎使用YX-脚本中心",
   Icon = "rbxassetid://127276339495788",
   Duration = 1,
-  Callback = bindable,
+  local bindable = Instance.new("BindableFunction")
   Button1 = "欢迎使用",
-  Button2 = "持续更新",
+  Button2 = "YirdeX制作",
 })
 
 local GlobalEnv = getgenv()
 local FunctionEnv = getfenv()
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/obsidian_UI/refs/heads/main/Library.lua"))() 
-local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/obsidian_UI/refs/heads/main/ThemeManager.lua"))() 
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/DevSloPo/obsidian_UI/main/addons/SaveManager.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/Library.lua"))()  -- 加载主UI库
+local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/addons/ThemeManager.lua"))()  -- 加载主题管理器
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/addons/SaveManager.lua"))()    -- 加载配置管理器
+
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -147,6 +156,7 @@ local Tabs = {
         Description = "界面设置与部分功能",
         Icon = "settings"
     }),
+}
 
 local AB = Tabs.D:AddRightGroupbox("信息")
 local AA = Tabs.D:AddLeftGroupbox("人员名单","handshake")
@@ -286,13 +296,6 @@ AGA:AddButton({
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ShenJiaoBen/ScriptLoader/refs/heads/main/Linni_FreeLoader.lua"))()
     end
 })
-AGA:AddButton({
-    Text = "Msploit汉化脚本",
-    Func = function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/Msploit"))()
-    end
-})
-AGA:AddButton("Msploit里面内置通用脚本")
 
 AGA:AddButton({
     Text = "通用汉化脚本",
@@ -3065,13 +3068,12 @@ UniversalLeftGroup:AddButton({Text="重新加载角色",Func=function()
                 A2.Character:BreakJoints();
         end
 end});
-UniversalLeftGroup:AddButton({Text="通用甩飞[不能在墨水使用，秒封]",Func=function()
-        local ScriptContent = game:HttpGet("https://pastebin.com/raw/zqyDSUWX");
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
-end});
+UniversalLeftGroup:AddButton({
+Text="通用甩飞[不能在墨水使用，秒封]",
+Func=function()
+loadstring(game:HttpGet("https://pastebin.com/raw/zqyDSUWX"))()
+end
+});
 UniversalLeftGroup:AddButton({
     Text = "无敌",
     Func = function()
@@ -3164,10 +3166,6 @@ end});
 UniversalRightGroup:AddLabel("光影");
 UniversalRightGroup:AddButton({Text="光影",Func=function()
         loadstring(game:HttpGet("https://pastebin.com/raw/arzRCgwS"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 UniversalRightGroup:AddLabel("TX全自动翻译");
 UniversalRightGroup:AddButton({Text="TX全自动翻译",Func=function()
@@ -3311,7 +3309,7 @@ MenuGroup:AddDropdown("NotificationSide", {
     end,
 })
 MenuGroup:AddDropdown("DPIDropdown", {
-    Values = { "25%", "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
+    Values = { "25%", "50%", "75%", "100%", "125%", "150%", "175%", "200%" }, 
     Default = "100%",
     Text = "界面大小",
     Callback = function(Value)
