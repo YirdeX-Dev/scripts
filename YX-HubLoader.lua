@@ -4,6 +4,6 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/scripts/refs/h
 elseif game.PlaceId == 572725757277227 then loadstring(game:HttpGet(""))()
 
 else
-loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/scripts/refs/heads/main/YX-ChinaHub.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/YX-ChinaHub.lua"))()
 
 end---结束
