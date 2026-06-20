@@ -730,9 +730,14 @@ AGA:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/Msploit"))()
     end
 })
-
 AGA:AddButton({
-    Text = "fartsaken汉化脚本",
+    Text = "访客中心汉化脚本",
+    Func = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/%E8%AE%BF%E5%AE%A2%E4%B8%AD%E5%BF%83"))()
+    end
+})
+AGA:AddButton({
+    Text = "fart汉化脚本",
     Func = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/fartsaken"))()
     end
