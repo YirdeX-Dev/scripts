@@ -79,9 +79,9 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 local GlobalEnv = getgenv()
 local FunctionEnv = getfenv()
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/Library.lua"))()  -- 加载主UI库
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/Library.lua"))()  -- 加载主UI库
 local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/addons/ThemeManager.lua"))()  -- 加载主题管理器
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/addons/SaveManager.lua"))()    -- 加载配置管理器
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/ThemeManager.lua"))()    -- 加载配置管理器
 
 
 local Players = game:GetService("Players")
