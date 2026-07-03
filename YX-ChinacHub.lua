@@ -3,10 +3,9 @@ local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
-  local repo = 'https://raw.githubusercontent.com/DevSloPo/obsidian_UI/main/'
-local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
-local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
-local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
+  local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/Library.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/DevSloPo/obsidian_UI/main/addons/SaveManager.lua"))()
+local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/ThemeManager.lua"))()
 local Options = Library.Options
 local Toggles = Library.Toggles
 local A1 = game:GetService("Players")
@@ -43,90 +42,10 @@ local Window = Library:CreateWindow({
 })
 
 local Tabs = {
-    D = Window:AddTab("首页", "house"),
     Main = Window:AddTab("通用功能", "code-xml"),
     ScriptCenter = Window:AddTab("脚本中心", "bug"),
     ["UI Settings"] = Window:AddTab("设置", "settings"),
 }
-
-
-local AB = Tabs.D:AddRightGroupbox("信息")
-local AA = Tabs.D:AddLeftGroupbox("人员名单","handshake")
-
- Tabs.D:UpdateWarningBox({
-        Title = '脚本信息',
-        Text = '请不要在bloxstrike服务器执行脚本，不然会被封禁，若执意执行，[<font color=\"rgb(255, 0, 0)\">后果自负，我们概不负责</font>]',
-        IsNormal = true,
-        Visible = true,
-        LockSize = true,
-    })
-AA:AddLabel("[<font color=\"rgb(0, 255, 0)\">YirdeX</font>]制作者 | 所有者")
-AA:AddLabel("[<font color=\"rgb(0, 255, 0)\">秋词</font>]制作者 | 开发者")
-AA:AddLabel("[<font color=\"rgb(0, 255, 0)\">白枫</font>]测试者")
-
-
-AB:AddButton({
-    Text = "复制YirdeXQQ主群",
-    Func = function()
-    setclipboard("2152069753")
-    Tooltip = "复制主群号",
-    Library:Notify({
-    Title = "YirdeX-提示",
-    Description = "复制成功",
-    Time = 2,
-})
-    end
-})
-AB:AddButton({
-    Text = "复制YirdeX快手号",
-    Func = function()
-    setclipboard("3839425043")
-       Tooltip = "复制快手号",
-       Library:Notify({
-    Title = "YirdeX-提示",
-    Description = "复制成功",
-    Time = 2,
-})
-    end
-})
-AB:AddButton({
-    Text = "复制YirdeXB站lD",
-    Func = function()
-    setclipboard("UID:3493111925836628")
-       Tooltip = "复制B站lD",
-    Library:Notify({
-    Title = "YirdeX-提示",
-    Description = "复制成功",
-    Time = 2,
-})
-    end
-})
-AB:AddLabel("--------------------")
-AB:AddButton({
-    Text = "复制AF主群",
-    Func = function()
-    setclipboard("https://qun.qq.com/universal-share/share?ac=1&authKey=bEmFYn95LgJAyVYjM00CBWVn8i23mWAyj5Z%2Ba3rithMWPxzDwKlZ9wKtaB7q2s6n&busi_data=eyJncm91cENvZGUiOiI5Mzg3MTQ0MjciLCJ0b2tlbiI6IkFGL2Z6QTE5WUNRU2UrOGF6SzRQRVJDdmc5YzJjZVVmQXdEbmhObHNnRUhQZDUzL3djamJUdm5SRThDSjFrQmYiLCJ1aW4iOiIzNDM1Mjg2MTc3In0%3D&data=ahUTHr2un-Gf0AHE1oBjxdt0-y4VEoLSnZ1D6Ve-6KdsYM4R_Rw-hJ-amg0HfFokPb9CyhFVCDesPER_Ave_8A&svctype=4&tempid=h5_group_info")
-       Tooltip = "复制AF主群",
-    Library:Notify({
-    Title = "YirdeX-提示",
-    Description = "复制成功",
-    Time = 2,
-})
-    end
-})
-AB:AddButton({
-    Text = "复制秋词快手号",
-    Func = function()
-    setclipboard("XQWANYYDS")
-       Tooltip = "复制秋词快手号",
-    Library:Notify({
-    Title = "YirdeX-提示",
-    Description = "复制成功",
-    Time = 2,
-})
-    end
-})
-----------
 ----------
 local ScriptCenterLeftGroup = Tabs.ScriptCenter:AddLeftGroupbox("脚本中心1");
 local ScriptCenterRightGroup = Tabs.ScriptCenter:AddRightGroupbox("脚本中心2");
