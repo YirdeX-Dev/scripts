@@ -1,11 +1,14 @@
-local GlobalEnv = getgenv()
-local FunctionEnv = getfenv()
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
-local repo = 'https://raw.githubusercontent.com/DevSloPo/obsidian_UI/main/'
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+  local repo = 'https://raw.githubusercontent.com/DevSloPo/obsidian_UI/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
 local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
-
+local Options = Library.Options
+local Toggles = Library.Toggles
 local A1 = game:GetService("Players")
 local A2 = A1.LocalPlayer
 local A3 = game:GetService("RunService")
@@ -16,10 +19,10 @@ local A7 = game:GetService("TeleportService")
 local A8 = workspace
 local A9 = game:GetService("HttpService")
 
-local Win = Library:CreateWindow({
-	Title = "YX-脚本中心",
-    Footer = "汉化中心",
-	  Size = UDim2.fromOffset(750, 650),
+local Window = Library:CreateWindow({
+    Title = "YX-脚本中心",
+    Footer = "脚本中心",
+    Size = UDim2.fromOffset(750, 650),
     AutoShow = true,
     NotifySide = "Right",
     ShowCustomCursor = true,
@@ -40,32 +43,17 @@ local Win = Library:CreateWindow({
 })
 
 local Tabs = {
-    D = Win:AddTab({
-        Name = "首页",
-        Description = "[主要群聊:2152069753]",
-        Icon = "house"
-    }),
-    Main = Win:AddTab({
-        Name = "通用功能(维修)",
-        Description = "6",
-        Icon = "code-xml"
-    }),
-    ScriptCenter = Win:AddTab({
-        Name = "脚本中心",
-        Description = "汇聚很多服务器优秀脚本",
-        Icon = "bug"
-    }),
-    ["UI Settings"] = Win:AddTab({
-        Name = "设置",
-        Description = "界面设置与部分功能",
-        Icon = "settings"
-    }),
+    D = Window:AddTab("首页", "house"),
+    Main = Window:AddTab("通用功能", "code-xml"),
+    ScriptCenter = Window:AddTab("脚本中心", "bug"),
+    ["UI Settings"] = Window:AddTab("设置", "settings"),
 }
+
 
 local AB = Tabs.D:AddRightGroupbox("信息")
 local AA = Tabs.D:AddLeftGroupbox("人员名单","handshake")
 
-    Tabs.D:UpdateWarningBox({
+ Tabs.D:UpdateWarningBox({
         Title = '脚本信息',
         Text = '请不要在bloxstrike服务器执行脚本，不然会被封禁，若执意执行，[<font color=\"rgb(255, 0, 0)\">后果自负，我们概不负责</font>]',
         IsNormal = true,
@@ -460,6 +448,14 @@ Tabs.ScriptCenter:UpdateWarningBox({
 })
 
 -------------分开-------------
+Tabs.Main:UpdateWarningBox({
+    Title = '<font color=\"rgb(255, 0, 0)\">警告!</font>',
+    Text = '部分功能无法在墨水游戏或者高反作弊系统的游戏下使用,请慎重考虑功能',
+    IsNormal = true,
+    Visible = true,
+    LockSize = true,
+})
+
 local LeftGroup = Tabs.Main:AddLeftGroupbox("主要功能（全部可在墨水使用）")
 local Cnmb = Tabs.Main:AddLeftGroupbox("外部加载功能")
 local Tong = Tabs.Main:AddLeftGroupbox("通用功能")
