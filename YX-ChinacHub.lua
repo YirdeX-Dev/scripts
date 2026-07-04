@@ -22,6 +22,7 @@ local Window = Library:CreateWindow({
     Title = "YX-脚本中心",
     Footer = "脚本中心",
     Size = UDim2.fromOffset(750, 650),
+    Icon = "rbxassetid://71400987113958", 
     AutoShow = true,
     NotifySide = "Right",
     ShowCustomCursor = true,
@@ -114,8 +115,8 @@ local ScriptCenter = {
         GroupName = "墨水游戏",
         List = {
             {Name = "AX-有芙同享汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/ax%E8%84%9A%E6%9C%AC%E7%A7%8B%E8%BE%9E%E6%B1%89%E5%8C%96"},
-            {Name = "AX-YirdeX汉化脚本", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/fartsaken"},
-            {Name = "墨水Ringta汉化(无卡密)", Url = "https://raw.githubusercontent.com/hdjsjjdgrhj/script-hub/refs/heads/main/Ringta"},
+            {Name = "AX-YirdeX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/Ax%E6%B1%89%E5%8C%96%E8%84%9A%E6%9C%AC"},   
+            {Name = "墨水Ringta汉化", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/RINGTA/ink%20Game.lua"},
             {Name = "Unm汉化，卡密ink50", Url = "https://raw.githubusercontent.com/Youfutongxiang1/unm-CN/refs/heads/main/README.md"},
         }
     },
@@ -144,13 +145,9 @@ local ScriptCenter = {
     {
         GroupName = "被遗弃",
         List = {
-            {Name = "被遗弃无卡密超好用", Url = "https://rawscripts.net/raw/G666-Forsaken-Keyless-auto-gen-reach-autoblock-+-more-63283"},
             {Name = "RINGTA汉化脚本", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/RINGTA/forsaken"},
             {Name = "Fart汉化脚本", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/fartsaken"},
             {Name = "访客中心汉化脚本", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/fartsaken"},
-            {Name = "被遗弃英文无卡密", Url = "https://github.com/shenxiuqi974/guesting-but-chinese/releases/download/hushwhw/default.txt"},
-            {Name = "被遗弃英文无卡密(好用)", Url = "https://pastebin.com/raw/zH9Extzk"},
-            {Name = "XA被遗弃脚本(无卡密中文)", Url = "https://raw.gitcode.com/XiaoYunUwU/XA/raw/main/Loader.lua"},
         }
     },
     {
