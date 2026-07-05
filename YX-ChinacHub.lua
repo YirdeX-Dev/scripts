@@ -3,11 +3,10 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
-  local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/Library.lua"))()
-  
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/DevSloPo/obsidian_UI/main/addons/SaveManager.lua"))()
-
-local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/ThemeManager.lua"))()
+local repo = "https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/"
+local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
+local SaveManager = loadstring(game:HttpGet(repo .. "SaveManager.lua"))()
+local ThemeManager = loadstring(game:HttpGet(repo .. "ThemeManager.lua"))()
 
 local Options = Library.Options
 local Toggles = Library.Toggles
