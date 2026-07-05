@@ -1,13 +1,17 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+
   local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/Library.lua"))()
+  
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/DevSloPo/obsidian_UI/main/addons/SaveManager.lua"))()
+
 local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/ThemeManager.lua"))()
+
 local Options = Library.Options
 local Toggles = Library.Toggles
+
 local A1 = game:GetService("Players")
 local A2 = A1.LocalPlayer
 local A3 = game:GetService("RunService")
@@ -116,6 +120,7 @@ local ScriptCenter = {
         List = {
             {Name = "AX-有芙同享汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/ax%E8%84%9A%E6%9C%AC%E7%A7%8B%E8%BE%9E%E6%B1%89%E5%8C%96"},
             {Name = "AX-YirdeX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/Ax%E6%B1%89%E5%8C%96%E8%84%9A%E6%9C%AC"},   
+             {Name = "HSX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/HSX%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F"},   
             {Name = "墨水Ringta汉化", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/RINGTA/ink%20Game.lua"},
             {Name = "Unm汉化，卡密ink50", Url = "https://raw.githubusercontent.com/Youfutongxiang1/unm-CN/refs/heads/main/README.md"},
         }
@@ -373,10 +378,10 @@ Tabs.Main:UpdateWarningBox({
 })
 
 local LeftGroup = Tabs.Main:AddLeftGroupbox("主要功能（全部可在墨水使用）")
-local Cnmb = Tabs.Main:AddLeftGroupbox("外部加载功能")
-local Tong = Tabs.Main:AddLeftGroupbox("通用功能")
+local Cnmb = Tabs.Main:AddLeftGroupbox("通用功能1")
+local Tong = Tabs.Main:AddLeftGroupbox("通用功能2")
 local Nbcoos = Tabs.Main:AddLeftGroupbox("传送")
-local RightGroup = Tabs.Main:AddRightGroupbox("外部加载")
+local RightGroup = Tabs.Main:AddRightGroupbox("杂项")
 local Ksqcnbcos = Tabs.Main:AddRightGroupbox("透视（全部可在墨水使用）")
 local Bofang = Tabs.Main:AddRightGroupbox("播放功能")
 local Yule = Tabs.Main:AddRightGroupbox("娱乐脚本功能")
@@ -1112,6 +1117,15 @@ LeftGroup:AddButton({Text="墨水飞行",Func=function()
 end});
 
 --右侧功能
+RightGroup:AddButton({Text="HSX卡密",Func=function()
+        local demoKey = "HSX-7562-3194-0835-4981-2470-1488-1029-6967"
+        if setclipboard then
+            setclipboard(demoKey)
+        local Func = loadstring(ScriptContent);
+        if Func then
+                Func();
+        end
+end});
 RightGroup:AddButton({Text="加载AX汉化",Func=function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/fningna51-stack/-/main/%E6%96%B0AX%E6%B1%89%E5%8C%96%E5%BA%93"))()
         local Func = loadstring(ScriptContent);
