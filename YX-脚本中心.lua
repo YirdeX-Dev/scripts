@@ -1115,23 +1115,15 @@ LeftGroup:AddButton({Text="墨水飞行",Func=function()
         FlyModule.Start();
 end});
 
---右侧功能
-RightGroup:AddButton({Text="HSX卡密",Func=function()
+RightGroup:AddButton({
+    Text = "HSX卡密",
+    Func = function()
         local demoKey = "HSX-7562-3194-0835-4981-2470-1488-1029-6967"
         if setclipboard then
             setclipboard(demoKey)
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
         end
-end});
-RightGroup:AddButton({Text="加载AX汉化",Func=function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/fningna51-stack/-/main/%E6%96%B0AX%E6%B1%89%E5%8C%96%E5%BA%93"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
-end});
+    end
+})
 RightGroup:AddButton({Text="柳叶碰飞(墨水可以使用)",Func=function()
         local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
