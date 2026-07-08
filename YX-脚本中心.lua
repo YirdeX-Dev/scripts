@@ -29,7 +29,7 @@ local Window = Library:CreateWindow({
     AutoShow = true,
     NotifySide = "Right",
     ShowCustomCursor = true,
-    IconSize = UDim2.fromOffset(40, 40),
+    IconSize = UDim2.fromOffset(30, 30),
     Resizable = true,
     MobileButtonsSide = "Left",
     DisableSearch = false,
@@ -48,6 +48,7 @@ local Window = Library:CreateWindow({
 local Tabs = {
     Main = Window:AddTab("通用功能", "code-xml"),
     ScriptCenter = Window:AddTab("脚本中心", "bug"),
+    YX = Window:AddTab("YX加载", "menu"),
     ["UI Settings"] = Window:AddTab("设置", "settings"),
 }
 ----------
@@ -93,6 +94,11 @@ local ScriptCenter = {
             {Name = "RINGTA汉化脚本", Url = "https://raw.githubusercontent.com/hdjsjjdgrhj/script-hub/refs/heads/main/99Nights"},
             {Name = "99夜汉化脚本(无敌有效果)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E7%A7%8B%E8%BE%9E99%E5%A4%9C%E6%B1%89%E5%8C%96"},
             {Name = "AF Hub 99夜", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/99%E5%A4%9C%E8%84%9A%E6%9C%AC"},
+        }
+    },
+            GroupName = "动物医院",
+        List = {
+            {Name = "Cyraa汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/Cyraa"},
         }
     },
     {
@@ -150,7 +156,7 @@ local ScriptCenter = {
         GroupName = "被遗弃",
         List = {
             {Name = "RINGTA汉化脚本", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/RINGTA/forsaken"},
-            {Name = "Fart汉化脚本", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/fartsaken"},
+            {Name = "Fart汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/fartsakena"},
             {Name = "访客中心汉化脚本", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/fartsaken"},
         }
     },
@@ -4011,6 +4017,30 @@ Nbcoos:AddButton({
     end,
     DoubleClick = false
 })
+-------------分开-------------
+local MenuGroup1 = Tabs.YX:AddLeftGroupbox("YX脚本外部加载")
+MenuGroup1:AddButton({
+    Text = "YX-HUB外部加载",
+    Func = function()
+if game.PlaceId == 142823291 then --- 服务器id
+loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/scripts/refs/heads/main/Game/YX-HubMM2%E5%8A%A0%E5%AF%86%E8%84%9A%E6%9C%AC.lua"))()---该服务器脚本
+
+elseif game.PlaceId == 572725757277227 then 
+
+else
+--无
+end
+
+    end
+})
+local MenuGroup2 = Tabs.YX:AddRightGroupbox("服务器状态")
+local LeftTabBox1 = MenuGroup2:AddLeftTabbox("状态")
+local Label1 = LeftTabBox1:AddLabel("🟩可用", false)
+local Label2 = LeftTabBox1:AddLabel("🟨可用但有缺陷", false)
+local Label3 = LeftTabBox1:AddLabel("⬛已停运", false)
+
+local RightTabBox1 = MenuGroup2:AddRightTabbox("服务器")
+local Label1x = LeftTabBox1:AddLabel("🟩破坏者谜团", false)
 -------------分开-------------
 local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("界面设置")
 
