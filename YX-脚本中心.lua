@@ -3,10 +3,9 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
-local repo = "https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/"
-local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
-local SaveManager = loadstring(game:HttpGet(repo .. "SaveManager.lua"))()
-local ThemeManager = loadstring(game:HttpGet(repo .. "ThemeManager.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/Library.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/SaveManager.lua"))()
+local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/ThemeManager.lua"))()
 
 local Options = Library.Options
 local Toggles = Library.Toggles
@@ -48,7 +47,7 @@ local Window = Library:CreateWindow({
 local Tabs = {
     Main = Window:AddTab("通用功能", "code-xml"),
     ScriptCenter = Window:AddTab("脚本中心", "bug"),
-    YX = Window:AddTab("YX加载", "menu"),
+    YXIKB = Window:AddTab("YX加载", "menu"),
     ["UI Settings"] = Window:AddTab("设置", "settings"),
 }
 ----------
@@ -96,6 +95,7 @@ local ScriptCenter = {
             {Name = "AF Hub 99夜", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/99%E5%A4%9C%E8%84%9A%E6%9C%AC"},
         }
     },
+    {
             GroupName = "动物医院",
         List = {
             {Name = "Cyraa汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/Cyraa"},
@@ -406,6 +406,33 @@ local A28 = false;
 local A29 = true;
 local PL = {};
 local CP = nil;
+local TabBox = Tabs.YXIKB:AddRightTabbox()
+
+local Tab1 = TabBox:AddTab("服务器状态指标","list")
+Tab1:AddLabel("🟩可用")
+Tab1:AddLabel("🟨可用但有缺陷")
+Tab1:AddLabel("⬛已停更")
+
+local Tab2 = TabBox:AddTab("服务器", "menu")
+Tab2:AddLabel("🟩破坏者谜团")
+
+
+local MenuGroup1 = Tabs.YXIKB:AddLeftGroupbox("YX脚本外部加载")
+MenuGroup1:AddButton({
+    Text = "YX-HUB外部加载",
+    Func = function()
+if game.PlaceId == 142823291 then --- 服务器id
+loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/scripts/refs/heads/main/Game/YX-HubMM2%E5%8A%A0%E5%AF%86%E8%84%9A%E6%9C%AC.lua"))()---该服务器脚本
+
+elseif game.PlaceId == 572725757277227 then 
+
+else
+print("😍YX牛逼")
+end
+
+    end
+})
+
 local bulletTrackingHook = nil;
 local function safeNotify(title, message, duration)
         warn(title .. ": " .. message);
@@ -4018,29 +4045,7 @@ Nbcoos:AddButton({
     DoubleClick = false
 })
 -------------分开-------------
-local MenuGroup1 = Tabs.YX:AddLeftGroupbox("YX脚本外部加载")
-MenuGroup1:AddButton({
-    Text = "YX-HUB外部加载",
-    Func = function()
-if game.PlaceId == 142823291 then --- 服务器id
-loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/scripts/refs/heads/main/Game/YX-HubMM2%E5%8A%A0%E5%AF%86%E8%84%9A%E6%9C%AC.lua"))()---该服务器脚本
 
-elseif game.PlaceId == 572725757277227 then 
-
-else
---无
-end
-
-    end
-})
-local MenuGroup2 = Tabs.YX:AddRightGroupbox("服务器状态")
-local LeftTabBox1 = MenuGroup2:AddLeftTabbox("状态")
-local Label1 = LeftTabBox1:AddLabel("🟩可用", false)
-local Label2 = LeftTabBox1:AddLabel("🟨可用但有缺陷", false)
-local Label3 = LeftTabBox1:AddLabel("⬛已停运", false)
-
-local RightTabBox1 = MenuGroup2:AddRightTabbox("服务器")
-local Label1x = LeftTabBox1:AddLabel("🟩破坏者谜团", false)
 -------------分开-------------
 local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("界面设置")
 
