@@ -336,7 +336,6 @@ local ScriptCenter = {
         GroupName = "破坏者谜团",
         List = {
             {Name = "破坏者谜团脚本", Url = "https://pastebin.com/raw/VRwdkSG3"},
-            {Name = "Foxname MM2", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/Foxnamemm2.lua"},
         }
     }
 }
