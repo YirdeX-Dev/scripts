@@ -127,6 +127,7 @@ local ScriptCenter = {
             {Name = "AX-YirdeX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/Ax%E6%B1%89%E5%8C%96%E8%84%9A%E6%9C%AC"},   
              {Name = "HSX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/HSX%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F"},   
             {Name = "墨水Ringta汉化", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/RINGTA/ink%20Game.lua"},
+            {Name = "墨水Blossom汉化", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/Blossom"},
             {Name = "Unm汉化，卡密ink50", Url = "https://raw.githubusercontent.com/Youfutongxiang1/unm-CN/refs/heads/main/README.md"},
         }
     },
@@ -385,7 +386,7 @@ local LeftGroup = Tabs.Main:AddLeftGroupbox("主要功能（全部可在墨水�
 local Cnmb = Tabs.Main:AddLeftGroupbox("通用功能1")
 local Tong = Tabs.Main:AddLeftGroupbox("通用功能2")
 local Nbcoos = Tabs.Main:AddLeftGroupbox("传送")
-local RightGroup = Tabs.Main:AddRightGroupbox("杂项")
+local RightGroup = Tabs.Main:AddRightGroupbox("杂项&卡密")
 local Ksqcnbcos = Tabs.Main:AddRightGroupbox("透视（全部可在墨水使用）")
 local Bofang = Tabs.Main:AddRightGroupbox("播放功能")
 local Yule = Tabs.Main:AddRightGroupbox("娱乐脚本功能")
@@ -405,8 +406,244 @@ local A28 = false;
 local A29 = true;
 local PL = {};
 local CP = nil;
-local TabBox = Tabs.YXIKB:AddRightTabbox()
+RightGroup:AddButton({
+    Text = "Blossom卡密",
+    Func = function()
+        local demoKey = "luablossom"
+        if setclipboard then
+            setclipboard(demoKey)
+        end
+    end
+})
+RightGroup:AddButton({
+    Text = "HSX卡密",
+    Func = function()
+        local demoKey = "HSX-7562-3194-0835-4981-2470-1488-1029-6967"
+        if setclipboard then
+            setclipboard(demoKey)
+        end
+    end
+})
+RightGroup:AddButton({Text="柳叶碰飞(墨水可以使用)",Func=function()
+        local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
 
+local Enabled = false
+local targetPlayer = nil
+local originalCFrame = nil
+
+local function findPlayer(text)
+    text = text:lower()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if string.find(plr.Name:lower(), text) or string.find(plr.DisplayName:lower(), text) then
+            return plr
+        end
+    end
+end
+
+lp.Chatted:Connect(function(msg)
+    if not Enabled then return end
+    if msg:sub(1,6):lower() == ";kill " then
+        local name = msg:sub(7)
+        local plr = findPlayer(name)
+        if plr and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            targetPlayer = plr
+            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                originalCFrame = lp.Character.HumanoidRootPart.CFrame
+            end
+            if statusLabel then
+                statusLabel.Text = "已锁定 " .. plr.Name
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.01) do
+        if not Enabled then continue end
+        if not targetPlayer then continue end
+
+        local char = targetPlayer.Character
+        if not char or not char:FindFirstChild("Humanoid") then
+            targetPlayer = nil
+            if statusLabel then statusLabel.Text = "开启 (未锁定)" end
+            continue
+        end
+
+        local hum = char.Humanoid
+        if hum.Health <= 0 then
+            targetPlayer = nil
+            if statusLabel then statusLabel.Text = "开启 (未锁定)" end
+            continue
+        end
+
+        local myChar = lp.Character
+        local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
+        local targetHRP = char:FindFirstChild("HumanoidRootPart")
+
+        if myHRP and targetHRP then
+            local offset = targetHRP.Velocity.Magnitude < 0.1 and 0 or 7
+            local goal = targetHRP.CFrame * CFrame.new(0,0,-offset) * CFrame.Angles(0, math.rad(-3), 0)
+            myHRP.CFrame = myHRP.CFrame:Lerp(goal, 0.4)
+            myHRP.Velocity = Vector3.new(0,0,0)
+            myHRP.RotVelocity = Vector3.new(0,0,0)
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait() do
+        if not Enabled then continue end
+        local hum = lp.Character and lp.Character:FindFirstChild("Humanoid")
+        if hum then
+            hum:Move(Vector3.one * 1e31)
+        end
+    end
+end)
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FlyOffGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = lp:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 130)
+mainFrame.Position = UDim2.new(0.5, -110, 0.3, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+mainFrame.BackgroundTransparency = 0.25
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = mainFrame
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(255, 255, 255)
+stroke.Thickness = 1
+stroke.Transparency = 0.8
+stroke.Parent = mainFrame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 28)
+title.BackgroundTransparency = 1
+title.Text = "碰飞(碰到人就让对面甩飞)"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 14
+title.Font = Enum.Font.GothamBold
+title.Parent = mainFrame
+
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 160, 0, 32)
+toggleBtn.Position = UDim2.new(0.5, -80, 0, 38)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+toggleBtn.Text = "开启碰飞"
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.Font = Enum.Font.GothamSemibold
+toggleBtn.TextSize = 12
+toggleBtn.Parent = mainFrame
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 8)
+btnCorner.Parent = toggleBtn
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, 0, 0, 20)
+statusLabel.Position = UDim2.new(0, 0, 0, 78)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "状态: 关闭"
+statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusLabel.TextSize = 11
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.Parent = mainFrame
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 80, 0, 24)
+closeBtn.Position = UDim2.new(0.5, -40, 0, 102)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeBtn.Text = "关闭甩飞脚本(关了需要重新加载)"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamSemibold
+closeBtn.TextSize = 10
+closeBtn.Parent = mainFrame
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 6)
+closeCorner.Parent = closeBtn
+
+toggleBtn.MouseButton1Click:Connect(function()
+    Enabled = not Enabled
+    if Enabled then
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+        toggleBtn.Text = "关闭碰飞"
+        statusLabel.Text = "开启"
+        targetPlayer = nil
+    else
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        toggleBtn.Text = "开启碰飞"
+        statusLabel.Text = "状态: 关闭"
+        targetPlayer = nil
+        originalCFrame = nil
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    Enabled = false
+    targetPlayer = nil
+    originalCFrame = nil
+    screenGui:Destroy()
+end)
+
+Enabled = false
+targetPlayer = nil
+
+print("😝😝😝")
+        local Func = loadstring(ScriptContent);
+        if Func then
+                Func();
+        end
+end});
+RightGroup:AddButton({Text="TX全自动翻译",Func=function()
+        TX = "TX Script"
+Script = "全自动翻译"
+loadstring(game:HttpGet("https://raw.githubusercontent.com/JsYb666/Item/refs/heads/main/Auto-language"))()
+        local Func = loadstring(ScriptContent);
+        if Func then
+                Func();
+        end
+end});
+RightGroup:AddButton({Text="TX死铁轨全自动刷债券",Func=function()
+        TX = "TX Script"
+Script = "TX自动刷债券V4"
+loadstring(game:HttpGet("https://raw.githubusercontent.com/JsYb666/Item/refs/heads/main/Auto-Bond-V4"))()
+        local Func = loadstring(ScriptContent);
+        if Func then
+                Func();
+        end
+end});
+RightGroup:AddButton({Text="SX翻译",Func=function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/SQ182/y/refs/heads/main/翻译.lua"))()
+        local Func = loadstring(ScriptContent);
+        if Func then
+                Func();
+        end
+end});
+RightGroup:AddButton({Text="音乐播放器脚本",Func=function()
+        loadstring(game:HttpGet("http://music.567099.xyz/music.php"))()
+        local Func = loadstring(ScriptContent);
+        if Func then
+                Func();
+        end
+end});
+RightGroup:AddButton({Text="秋辞音乐播放器",Func=function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/fningna51-stack/-/main/%E7%A7%8B%E8%BE%9E%E7%BA%AF%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%84%9A%E6%9C%AC"))()
+        local Func = loadstring(ScriptContent);
+        if Func then
+                Func();
+        end
+end});
+local TabBox = Tabs.YXIKB:AddRightTabbox()
 local Tab1 = TabBox:AddTab("服务器状态指标","list")
 Tab1:AddLabel("🟩可用")
 Tab1:AddLabel("🟨可用但有缺陷")
@@ -1145,235 +1382,6 @@ LeftGroup:AddButton({Text="墨水飞行",Func=function()
                 FlyModule.SetupCharacterListeners();
         end;
         FlyModule.Start();
-end});
-
-RightGroup:AddButton({
-    Text = "HSX卡密",
-    Func = function()
-        local demoKey = "HSX-7562-3194-0835-4981-2470-1488-1029-6967"
-        if setclipboard then
-            setclipboard(demoKey)
-        end
-    end
-})
-RightGroup:AddButton({Text="柳叶碰飞(墨水可以使用)",Func=function()
-        local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local lp = Players.LocalPlayer
-
-local Enabled = false
-local targetPlayer = nil
-local originalCFrame = nil
-
-local function findPlayer(text)
-    text = text:lower()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if string.find(plr.Name:lower(), text) or string.find(plr.DisplayName:lower(), text) then
-            return plr
-        end
-    end
-end
-
-lp.Chatted:Connect(function(msg)
-    if not Enabled then return end
-    if msg:sub(1,6):lower() == ";kill " then
-        local name = msg:sub(7)
-        local plr = findPlayer(name)
-        if plr and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            targetPlayer = plr
-            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                originalCFrame = lp.Character.HumanoidRootPart.CFrame
-            end
-            if statusLabel then
-                statusLabel.Text = "已锁定 " .. plr.Name
-            end
-        end
-    end
-end)
-
-task.spawn(function()
-    while task.wait(0.01) do
-        if not Enabled then continue end
-        if not targetPlayer then continue end
-
-        local char = targetPlayer.Character
-        if not char or not char:FindFirstChild("Humanoid") then
-            targetPlayer = nil
-            if statusLabel then statusLabel.Text = "开启 (未锁定)" end
-            continue
-        end
-
-        local hum = char.Humanoid
-        if hum.Health <= 0 then
-            targetPlayer = nil
-            if statusLabel then statusLabel.Text = "开启 (未锁定)" end
-            continue
-        end
-
-        local myChar = lp.Character
-        local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
-        local targetHRP = char:FindFirstChild("HumanoidRootPart")
-
-        if myHRP and targetHRP then
-            local offset = targetHRP.Velocity.Magnitude < 0.1 and 0 or 7
-            local goal = targetHRP.CFrame * CFrame.new(0,0,-offset) * CFrame.Angles(0, math.rad(-3), 0)
-            myHRP.CFrame = myHRP.CFrame:Lerp(goal, 0.4)
-            myHRP.Velocity = Vector3.new(0,0,0)
-            myHRP.RotVelocity = Vector3.new(0,0,0)
-        end
-    end
-end)
-
-task.spawn(function()
-    while task.wait() do
-        if not Enabled then continue end
-        local hum = lp.Character and lp.Character:FindFirstChild("Humanoid")
-        if hum then
-            hum:Move(Vector3.one * 1e31)
-        end
-    end
-end)
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FlyOffGUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = lp:WaitForChild("PlayerGui")
-
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 220, 0, 130)
-mainFrame.Position = UDim2.new(0.5, -110, 0.3, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-mainFrame.BackgroundTransparency = 0.25
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Parent = screenGui
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = mainFrame
-
-local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(255, 255, 255)
-stroke.Thickness = 1
-stroke.Transparency = 0.8
-stroke.Parent = mainFrame
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 28)
-title.BackgroundTransparency = 1
-title.Text = "碰飞(碰到人就让对面甩飞)"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 14
-title.Font = Enum.Font.GothamBold
-title.Parent = mainFrame
-
-local toggleBtn = Instance.new("TextButton")
-toggleBtn.Size = UDim2.new(0, 160, 0, 32)
-toggleBtn.Position = UDim2.new(0.5, -80, 0, 38)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-toggleBtn.Text = "开启碰飞"
-toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleBtn.Font = Enum.Font.GothamSemibold
-toggleBtn.TextSize = 12
-toggleBtn.Parent = mainFrame
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0, 8)
-btnCorner.Parent = toggleBtn
-
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, 0, 0, 20)
-statusLabel.Position = UDim2.new(0, 0, 0, 78)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "状态: 关闭"
-statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-statusLabel.TextSize = 11
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.Parent = mainFrame
-
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 80, 0, 24)
-closeBtn.Position = UDim2.new(0.5, -40, 0, 102)
-closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-closeBtn.Text = "关闭甩飞脚本(关了需要重新加载)"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.Font = Enum.Font.GothamSemibold
-closeBtn.TextSize = 10
-closeBtn.Parent = mainFrame
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 6)
-closeCorner.Parent = closeBtn
-
-toggleBtn.MouseButton1Click:Connect(function()
-    Enabled = not Enabled
-    if Enabled then
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-        toggleBtn.Text = "关闭碰飞"
-        statusLabel.Text = "开启"
-        targetPlayer = nil
-    else
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-        toggleBtn.Text = "开启碰飞"
-        statusLabel.Text = "状态: 关闭"
-        targetPlayer = nil
-        originalCFrame = nil
-    end
-end)
-
-closeBtn.MouseButton1Click:Connect(function()
-    Enabled = false
-    targetPlayer = nil
-    originalCFrame = nil
-    screenGui:Destroy()
-end)
-
-Enabled = false
-targetPlayer = nil
-
-print("😝😝😝")
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
-end});
-RightGroup:AddButton({Text="TX全自动翻译",Func=function()
-        TX = "TX Script"
-Script = "全自动翻译"
-loadstring(game:HttpGet("https://raw.githubusercontent.com/JsYb666/Item/refs/heads/main/Auto-language"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
-end});
-RightGroup:AddButton({Text="TX死铁轨全自动刷债券",Func=function()
-        TX = "TX Script"
-Script = "TX自动刷债券V4"
-loadstring(game:HttpGet("https://raw.githubusercontent.com/JsYb666/Item/refs/heads/main/Auto-Bond-V4"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
-end});
-RightGroup:AddButton({Text="SX翻译",Func=function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/SQ182/y/refs/heads/main/翻译.lua"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
-end});
-RightGroup:AddButton({Text="音乐播放器脚本",Func=function()
-        loadstring(game:HttpGet("http://music.567099.xyz/music.php"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
-end});
-RightGroup:AddButton({Text="秋辞音乐播放器(正在开发)",Func=function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/fningna51-stack/-/main/%E7%A7%8B%E8%BE%9E%E7%BA%AF%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%84%9A%E6%9C%AC"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Ksqcnbcos:AddToggle('ESPToggle', {
     Text = '方框透视',
