@@ -159,6 +159,7 @@ local ScriptCenter = {
             {Name = "RINGTA汉化脚本", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/RINGTA/forsaken"},
             {Name = "Fart汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/fartsakena"},
             {Name = "访客中心汉化脚本", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/fartsaken"},
+            {Name = "Fixsaken汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/Fixsaken.lua"},            
         }
     },
     {
@@ -390,7 +391,6 @@ local RightGroup = Tabs.Main:AddRightGroupbox("杂项&卡密")
 local Ksqcnbcos = Tabs.Main:AddRightGroupbox("透视（全部可在墨水使用）")
 local Bofang = Tabs.Main:AddRightGroupbox("播放功能")
 local Yule = Tabs.Main:AddRightGroupbox("娱乐脚本功能")
-local RotationControlGroup = Tabs.Main:AddRightGroupbox("旋转控制")
 local A17 = nil;
 local A18 = false;
 local A19 = false;
@@ -2747,137 +2747,6 @@ Yule:AddButton({Text="通用枪械脚本愤怒机器人",Func=function()
                 Func();
         end
 end});
-RotationControlGroup:AddButton({Text="旋转 10",Func=function()
-        if (A2 and A2.Character) then
-                local HRP = A2.Character:FindFirstChild("HumanoidRootPart");
-                if HRP then
-                        if A17 then
-                                A17:Destroy();
-                        end
-                        A17 = Instance.new("BodyAngularVelocity");
-                        A17.Parent = HRP;
-                        A17.Name = "CustomSpin";
-                        A17.MaxTorque = Vector3.new(0, 400000, 0);
-                        A17.AngularVelocity = Vector3.new(0, 10, 0);
-                end
-        end
-end});
-RotationControlGroup:AddButton({Text="旋转 20",Func=function()
-        if (A2 and A2.Character) then
-                local HRP = A2.Character:FindFirstChild("HumanoidRootPart");
-                if HRP then
-                        if A17 then
-                                A17:Destroy();
-                        end
-                        A17 = Instance.new("BodyAngularVelocity");
-                        A17.Parent = HRP;
-                        A17.Name = "CustomSpin";
-                        A17.MaxTorque = Vector3.new(0, 400000, 0);
-                        A17.AngularVelocity = Vector3.new(0, 20, 0);
-                end
-        end
-end});
-RotationControlGroup:AddButton({Text="旋转 30",Func=function()
-        if (A2 and A2.Character) then
-                local HRP = A2.Character:FindFirstChild("HumanoidRootPart");
-                if HRP then
-                        if A17 then
-                                A17:Destroy();
-                        end
-                        A17 = Instance.new("BodyAngularVelocity");
-                        A17.Parent = HRP;
-                        A17.Name = "CustomSpin";
-                        A17.MaxTorque = Vector3.new(0, 400000, 0);
-                        A17.AngularVelocity = Vector3.new(0, 30, 0);
-                end
-        end
-end});
-RotationControlGroup:AddButton({Text="旋转 50",Func=function()
-        if (A2 and A2.Character) then
-                local HRP = A2.Character:FindFirstChild("HumanoidRootPart");
-                if HRP then
-                        if A17 then
-                                A17:Destroy();
-                        end
-                        A17 = Instance.new("BodyAngularVelocity");
-                        A17.Parent = HRP;
-                        A17.Name = "CustomSpin";
-                        A17.MaxTorque = Vector3.new(0, 400000, 0);
-                        A17.AngularVelocity = Vector3.new(0, 50, 0);
-                end
-        end
-end});
-RotationControlGroup:AddButton({Text="旋转 100",Func=function()
-        if (A2 and A2.Character) then
-                local HRP = A2.Character:FindFirstChild("HumanoidRootPart");
-                if HRP then
-                        if A17 then
-                                A17:Destroy();
-                        end
-                        A17 = Instance.new("BodyAngularVelocity");
-                        A17.Parent = HRP;
-                        A17.Name = "CustomSpin";
-                        A17.MaxTorque = Vector3.new(0, 400000, 0);
-                        A17.AngularVelocity = Vector3.new(0, 100, 0);
-                end
-        end
-end});
-RotationControlGroup:AddButton({Text="旋转 200",Func=function()
-        if (A2 and A2.Character) then
-                local HRP = A2.Character:FindFirstChild("HumanoidRootPart");
-                if HRP then
-                        if A17 then
-                                A17:Destroy();
-                        end
-                        A17 = Instance.new("BodyAngularVelocity");
-                        A17.Parent = HRP;
-                        A17.Name = "CustomSpin";
-                        A17.MaxTorque = Vector3.new(0, 400000, 0);
-                        A17.AngularVelocity = Vector3.new(0, 200, 0);
-                end
-        end
-end});
-RotationControlGroup:AddButton({Text="旋转 500",Func=function()
-        if (A2 and A2.Character) then
-                local HRP = A2.Character:FindFirstChild("HumanoidRootPart");
-                if HRP then
-                        if A17 then
-                                A17:Destroy();
-                        end
-                        A17 = Instance.new("BodyAngularVelocity");
-                        A17.Parent = HRP;
-                        A17.Name = "CustomSpin";
-                        A17.MaxTorque = Vector3.new(0, 400000, 0);
-                        A17.AngularVelocity = Vector3.new(0, 500, 0);
-                end
-        end
-end});
-RotationControlGroup:AddButton({Text="停止旋转",Func=function()
-        if A17 then
-                A17:Destroy();
-                A17 = nil;
-        end
-end});
-Cnmb:AddSlider("SpinSpeedSlider", {Text="旋转速度",Default=0,Min=0,Max=500,Rounding=0,Compact=false,Callback=function(Value)
-        if (A2 and A2.Character) then
-                local HRP = A2.Character:FindFirstChild("HumanoidRootPart");
-                if HRP then
-                        if (Value > 0) then
-                                if A17 then
-                                        A17:Destroy();
-                                end
-                                A17 = Instance.new("BodyAngularVelocity");
-                                A17.Parent = HRP;
-                                A17.Name = "CustomSpin";
-                                A17.MaxTorque = Vector3.new(0, 400000, 0);
-                                A17.AngularVelocity = Vector3.new(0, Value, 0);
-                        elseif A17 then
-                                A17:Destroy();
-                                A17 = nil;
-                        end
-                end
-        end
-end});
 Cnmb:AddButton({Text="AF Hub飞行（秋辞飞行修复版）",Func=function()
         local main = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
@@ -3853,45 +3722,6 @@ Tong:AddToggle('AimbotToggle', {
                 fovCircle = nil
             end
         end
-    end
-})
-Tong:AddToggle('MyToggle', {
-    Text = '极速旋转（不能在墨水使用）',
-    Default = false,
-    Tooltip = '开启将会快速旋转',
-    Callback = function(Value)
-    local Character = LocalPlayer.Character
-        local Humanoid = Character:FindFirstChild("Humanoid")
-        
-        spawn(function()
-            local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://507776043"
-            local track = Humanoid:LoadAnimation(anim)
-            track:Play()
-            track:AdjustSpeed(0)
-            
-            if Character:FindFirstChild("Animate") then
-                Character.Animate.Disabled = true
-            end
-            
-            local sound = Instance.new("Sound")
-            sound.Name = "Sound"
-            sound.SoundId = "http://www.roblox.com/asset/?id=8114290584"
-            sound.Volume = 0
-            sound.Looped = false
-            sound.Parent = Workspace
-            sound:Play()
-            
-            wait()
-            
-            local bav = Instance.new("BodyAngularVelocity")
-            bav.Name = "Spinning"
-            bav.Parent = Character.HumanoidRootPart
-            bav.MaxTorque = Vector3.new(0, math.huge, 0)
-            bav.AngularVelocity = Vector3.new(0, 30, 0)
-            
-            wait(3.5)
-        end)
     end
 })
 Tong:AddToggle("BulletTrackingToggle", {Text="通用子弹追踪",Default=false,Callback=function(Enabled)
