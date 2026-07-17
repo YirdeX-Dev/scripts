@@ -28,7 +28,7 @@ local Window = Library:CreateWindow({
     AutoShow = true,
     NotifySide = "Right",
     ShowCustomCursor = true,
-    IconSize = UDim2.fromOffset(30, 30),
+    IconSize = UDim2.fromOffset(35, 35),
     Resizable = true,
     MobileButtonsSide = "Left",
     DisableSearch = false,
@@ -651,7 +651,7 @@ Tab1:AddLabel("⬛已停更")
 
 local Tab2 = TabBox:AddTab("服务器", "menu")
 Tab2:AddLabel("🟩破坏者谜团")
-
+Tab2:AddLabel("🟩一击竞技场")
 
 local MenuGroup1 = Tabs.YXIKB:AddLeftGroupbox("YX脚本外部加载")
 MenuGroup1:AddButton({
@@ -660,12 +660,11 @@ MenuGroup1:AddButton({
 if game.PlaceId == 142823291 then --- 服务器id
 loadstring(game:HttpGet("https://raw.githubusercontent.com/YIRDEX/scripts/refs/heads/main/Game/YX-HubMM2%E5%8A%A0%E5%AF%86%E8%84%9A%E6%9C%AC.lua"))()---该服务器脚本
 
-elseif game.PlaceId == 572725757277227 then 
-
+elseif game.PlaceId == 128326169270358 then 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/Game/%E4%B8%80%E5%87%BB%E7%AB%9E%E6%8A%80%E5%9C%BA.lua"))()
 else
 print("😍YX牛逼")
 end
-
     end
 })
 
