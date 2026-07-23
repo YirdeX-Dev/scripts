@@ -667,6 +667,14 @@ print("😍YX牛逼")
 end
     end
 })
+MenuGroup1:AddButton({
+    Text = "YX-伪装欺骗",
+    Func = function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/伪装欺骗.lua"))()
+    end
+})
+
+
 
 local bulletTrackingHook = nil;
 local function safeNotify(title, message, duration)
