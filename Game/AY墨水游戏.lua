@@ -1312,6 +1312,11 @@ end
 local Wjgjgn = Tabs.battle:AddLeftGroupbox("攻击", "users")
 local Cxwjgn = Tabs.battle:AddLeftGroupbox("朝向", "users")
 local ESPLeftGroup = Tabs.battle:AddRightGroupbox("透视", "eye")
+local Boots = Tabs.Wanjia:AddLeftGroupbox("篡改", "activity")
+local meun = Tabs.Wanjia:AddLeftGroupbox("杂项", "database")
+local Owner = Tabs.Wanjia:AddRightGroupbox("通行证", "ticket")
+local Csgn = Tabs.battle:AddRightGroupbox("传送", "ticket")
+local ControlGroup = Tabs.battle:AddRightGroupbox("旋转", "ticket")
 
 local espState = {
     enabled = false,
@@ -1900,12 +1905,6 @@ ESPLeftGroup:AddDropdown('PlayerList', {
         end
     end
 })
-
-local Boots = Tabs.Wanjia:AddLeftGroupbox("篡改", "activity")
-local meun = Tabs.Wanjia:AddLeftGroupbox("杂项", "database")
-local Owner = Tabs.Wanjia:AddRightGroupbox("通行证", "ticket")
-local Csgn = Tabs.Wanjia:AddRightGroupbox("传送", "ticket")
-local ControlGroup = Tabs.Wanjia:AddRightGroupbox("旋转", "ticket")
 
 local autoQTEActive = false
 local autoQTEConnection = nil
