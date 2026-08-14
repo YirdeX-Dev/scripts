@@ -5,6 +5,6 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
   Duration = 10,
   Callback = bindable,
   Button1 = "请加入群聊",
-  Button2 = "YX",
-  setclipboard("复制qq群"),
+  Button2 = "YX(复制qq群)",
+  setclipboard("2152069753"),
 })
