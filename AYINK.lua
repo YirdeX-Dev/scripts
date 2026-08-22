@@ -2376,7 +2376,6 @@ ControlGroup:AddButton({
         end
     end
 })
---通行证
 Owner:AddToggle("FakeVIP", {
     Text = "VIP",
     Default = false,
@@ -2390,19 +2389,24 @@ Owner:AddToggle("FakeVIP", {
             end
         end)
     end
-}):AddColorPicker("GuardESPColor", {
-    Default = Color3.fromRGB(200, 100, 200),
-    Title = "VIP衣服颜色",
+}):AddColorPicker("ClothingColor", {
+    Default = Color3.fromRGB(255, 255, 255),
+    Title = "衣服颜色",
     Transparency = 0,
     Callback = function(Value)
-        for _, esp in ipairs(ESP.ESPTable.Guard) do
-            if esp then
-                esp:SetColor(Value)
+        pcall(function()
+            local char = game:GetService("Players").LocalPlayer.Character
+            if not char then return end
+            -- 只修改 ClothingColor 这一个
+            for _, v in pairs(char:GetChildren()) do
+                if v.Name == "ClothingColor" and v:IsA("Color3Value") then
+                    v.Value = Value
+                    break
+                end
             end
-        end
+        end)
     end,
 })
-
 Owner:AddToggle("FakePermGuard", {
     Text = "永久守卫",
     Default = false,
