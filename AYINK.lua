@@ -1,6 +1,10 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -55,16 +59,6 @@ local Miong = Tabs.Main:AddRightGroupbox("旋转木马", "drama")
 local Znrdjd = Tabs.Main:AddRightGroupbox("鱿鱼游戏", "shapes")
 local Tkyx = Tabs.Main:AddLeftGroupbox("天空游戏", "tower-control")
 
--- ==================== 服务引用 ====================
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
-local LocalPlayer = Players.LocalPlayer
-
--- ==================== 安全获取 Remotes ====================
 local Remotes = nil
 local pullRopeRemote = nil
 local qteRemote = nil
@@ -1082,7 +1076,7 @@ local Boots = Tabs.Wanjia:AddLeftGroupbox("篡改", "activity")
 local meun = Tabs.Wanjia:AddLeftGroupbox("杂项", "database")
 local Owner = Tabs.Wanjia:AddRightGroupbox("通行证", "ticket")
 local Csgn = Tabs.battle:AddRightGroupbox("传送", "ticket")
-local ControlGroup = Tabs.battle:AddRightGroupbox("旋转", "ticket")
+local ControlGroup = Tabs.battle:AddLeftGroupbox("旋转", "ticket")
 
 local ESP = {
     Unloaded = false,
@@ -1683,17 +1677,11 @@ ESPLeftGroup:AddButton({
 })
 
 local function SetupPlayer(player)
-    if player == LocalPlayer then
-        return
-    end    
+    if player == LocalPlayer then return end
     local connection = player.CharacterAdded:Connect(function(character)
-        if ESP.Unloaded then
-            return
-        end        
-        task.wait(0.5)        
-        if ESP.Unloaded then
-            return
-        end        
+        if ESP.Unloaded then return end
+        task.wait(0.5)
+        if ESP.Unloaded then return end
         if Toggles.PlayerESP and Toggles.PlayerESP.Value then
             ESP.CreateESP({
                 Object = character,
@@ -1701,7 +1689,7 @@ local function SetupPlayer(player)
                 Color = Options.PlayerESPColor.Value,
                 Type = "Player",
             })
-        end        
+        end
         if Toggles.SeekerESP and Toggles.SeekerESP.Value and player:GetAttribute("IsHunter") then
             ESP.CreateESP({
                 Object = character,
@@ -1709,7 +1697,7 @@ local function SetupPlayer(player)
                 Color = Options.SeekerESPColor.Value,
                 Type = "Seeker",
             })
-        end        
+        end
         if Toggles.HiderESP and Toggles.HiderESP.Value and player:GetAttribute("IsHider") then
             ESP.CreateESP({
                 Object = character,
@@ -1718,31 +1706,21 @@ local function SetupPlayer(player)
                 Type = "Hider",
             })
         end
-    end)    
+    end)
     table.insert(ESP.Connections, connection)
 end
 
 local function SetupAttributeWatcher(player)
-    if player == LocalPlayer then
-        return
-    end    
+    if player == LocalPlayer then return end
     local connection = player.AttributeChanged:Connect(function(attribute)
-        if ESP.Unloaded then
-            return
-        end        
-        if attribute ~= "IsHunter" and attribute ~= "IsHider" then
-            return
-        end        
-        if not player.Character then
-            return
-        end        
+        if ESP.Unloaded then return end
+        if attribute ~= "IsHunter" and attribute ~= "IsHider" then return end
+        if not player.Character then return end
         if attribute == "IsHunter" then
             ESP.ClearESP("Seeker")
             if Toggles.SeekerESP and Toggles.SeekerESP.Value then
                 for _, target in ipairs(Players:GetPlayers()) do
-                    if target ~= LocalPlayer 
-                        and target:GetAttribute("IsHunter")
-                        and target.Character then
+                    if target ~= LocalPlayer and target:GetAttribute("IsHunter") and target.Character then
                         ESP.CreateESP({
                             Object = target.Character,
                             Text = target.Name .. " (搜寻者)",
@@ -1752,14 +1730,12 @@ local function SetupAttributeWatcher(player)
                     end
                 end
             end
-        end        
+        end
         if attribute == "IsHider" then
             ESP.ClearESP("Hider")
             if Toggles.HiderESP and Toggles.HiderESP.Value then
                 for _, target in ipairs(Players:GetPlayers()) do
-                    if target ~= LocalPlayer 
-                        and target:GetAttribute("IsHider")
-                        and target.Character then
+                    if target ~= LocalPlayer and target:GetAttribute("IsHider") and target.Character then
                         ESP.CreateESP({
                             Object = target.Character,
                             Text = target.Name .. " (躲藏者)",
@@ -1771,7 +1747,6 @@ local function SetupAttributeWatcher(player)
             end
         end
     end)
-    
     table.insert(ESP.Connections, connection)
 end
 
@@ -1781,59 +1756,32 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 table.insert(ESP.Connections, Players.PlayerAdded:Connect(function(player)
-    if ESP.Unloaded then
-        return
-    end
+    if ESP.Unloaded then return end
     SetupPlayer(player)
     SetupAttributeWatcher(player)
 end))
 
 function ESP.Unload()
-    if ESP.Unloaded then
-        return
-    end    
-    ESP.Unloaded = true    
+    if ESP.Unloaded then return end
+    ESP.Unloaded = true
     ESP.ClearAllESP()
-    
     if ESP.ESPUpdateConnection then
         SafeDisconnect(ESP.ESPUpdateConnection)
         ESP.ESPUpdateConnection = nil
     end
-    
     for i = #ESP.Connections, 1, -1 do
         local connection = ESP.Connections[i]
         SafeDisconnect(connection)
         ESP.Connections[i] = nil
     end
-    
-    for key, value in pairs(ESP.Maid) do
-        if typeof(value) == "RBXScriptConnection" then
-            SafeDisconnect(value)
-        elseif typeof(value) == "Instance" then
-            SafeDestroy(value)
-        elseif type(value) == "function" then
-            pcall(value)
-        end
-        ESP.Maid[key] = nil
-    end
-   
-    for _, list in pairs(ESP.ESPTable) do
-        table.clear(list)
-    end
-    
     getgenv().AFHub_InkGame_Loaded = false
     getgenv().AFHub_InkGame_Unload = nil
-    
     pcall(function()
         Library:Unload()
     end)
 end
 
 getgenv().AFHub_InkGame_Unload = ESP.Unload
-'''
-
-with open('/mnt/agents/output/ESP_Features_Extracted.lua', 'w', encoding='utf-8') as f:
-    f.write(content)
 
 meun:AddDropdown('QTEMode', {
     Text = 'QTE模式',
