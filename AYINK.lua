@@ -2407,7 +2407,7 @@ Owner:AddToggle("FakeVIP", {
             player:SetAttribute("ClothingColor", Value)
             
             -- 如果游戏用其他属性名，同时设置常见变体
-            player:SetAttribute("_ClothingColor", Value)
+            player:SetAttribute("ClothingColor", Value)
             player:SetAttribute("ClothColor", Value)
             player:SetAttribute("BodyColor", Value)
         end)
