@@ -2394,16 +2394,22 @@ Owner:AddToggle("FakeVIP", {
     Title = "衣服颜色",
     Transparency = 0,
     Callback = function(Value)
+        -- 只有 VIP 开关开着才生效
+        if not Toggles.FakeVIP or not Toggles.FakeVIP.Value then
+            Library:Notify("请先开启VIP", 2)
+            return
+        end
+        
         pcall(function()
-            local char = game:GetService("Players").LocalPlayer.Character
-            if not char then return end
-            -- 只修改 ClothingColor 这一个
-            for _, v in pairs(char:GetChildren()) do
-                if v.Name == "ClothingColor" and v:IsA("Color3Value") then
-                    v.Value = Value
-                    break
-                end
-            end
+            local player = game:GetService("Players").LocalPlayer
+            
+            -- 修改 Attribute 里的衣服颜色
+            player:SetAttribute("ClothingColor", Value)
+            
+            -- 如果游戏用其他属性名，同时设置常见变体
+            player:SetAttribute("_ClothingColor", Value)
+            player:SetAttribute("ClothColor", Value)
+            player:SetAttribute("BodyColor", Value)
         end)
     end,
 })
