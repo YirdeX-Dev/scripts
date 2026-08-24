@@ -390,7 +390,7 @@ local RotationControlGroup = Tabs.Main:AddRightGroupbox("旋转控制", "redo")
 
 Tabs.Main:UpdateWarningBox({
         Title = '脚本信息',
-        Text = '这里的功能请谨慎使用可能会被封禁，主要以缝合和二改不要再说我缝合我已经说了这个就是个缝合脚本中心OK？  \n致辞：秋辞 脚本中心汉化者：有芙同享  人机[<font color=\"rgb(255, 0, 0)\">谢谢您的使用，感谢大家</font>]',
+        Text = '这里的功能请谨慎使用可能会被封禁，主要以缝合和二改不要再说我缝合我已经说了这个就是个缝合脚本中心OK[<font color=\"rgb(255, 0, 0)\">谢谢您的使用，感谢大家</font>]',
         IsNormal = true,
         Visible = true,
         LockSize = true,
