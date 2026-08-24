@@ -350,6 +350,41 @@ local ScriptCenter = {
     }
 }
 
+local YX = Tabs.Main:AddLeftGroupbox("加载服务器")
+RightGroup:AddButton({
+    Text = "MM2(破坏者谜团)",
+    Func = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/Game/YX-HubMM2%E5%8A%A0%E5%AF%86%E8%84%9A%E6%9C%AC.lua"))()
+    end
+})
+RightGroup:AddButton({
+    Text = "一击竞技场",
+    Func = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/Game/一击竞技场.lua"))()
+    end
+})
+RightGroup:AddButton({
+    Text = "伪装欺骗",
+    Func = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/%E4%BC%AA%E8%A3%85%E6%AC%BA%E9%AA%97.lua"))()
+    end
+})
+
+
+local Qczhdh = Tabs.Qczhdh:AddRightTabbox()
+local Tab2 = Qczhdh:AddTab("服务器","menu")
+Tab2:AddLabel("🟩MM2")
+Tab2:AddLabel("🟩一击竞技场")
+Tab2:AddLabel("🟩伪装欺骗")
+
+
+local Tab1 = Qczhdh:AddTab("服务器状态", "menu")
+Tab1:AddLabel("🟩可用")
+Tab1:AddLabel("🟨可用但有缺陷")
+Tab1:AddLabel("⬛已停更")
+
+
+
 for _, category in ipairs(ScriptCenter) do
     local targetGroup = ((leftIndex <= rightIndex) and ScriptCenterLeftGroup) or ScriptCenterRightGroup;
     if (((targetGroup == ScriptCenterLeftGroup) and (leftIndex > 0)) or ((targetGroup == ScriptCenterRightGroup) and (rightIndex > 0))) then
@@ -390,7 +425,7 @@ local RotationControlGroup = Tabs.Main:AddRightGroupbox("旋转控制", "redo")
 
 Tabs.Main:UpdateWarningBox({
         Title = '脚本信息',
-        Text = '这里的功能请谨慎使用可能会被封禁，主要以缝合和二改不要再说我缝合我已经说了这个就是个缝合脚本中心OK[<font color=\"rgb(255, 0, 0)\">谢谢您的使用，感谢大家</font>]',
+        Text = '这里的功能请谨慎使用可能会被封禁，主要以缝合和二改不要再说我缝合我已经说了这个就是个缝合脚本中心OK？  \n致辞：秋辞 脚本中心汉化者：有芙同享  人机[<font color=\"rgb(255, 0, 0)\">谢谢您的使用，感谢大家</font>]',
         IsNormal = true,
         Visible = true,
         LockSize = true,
@@ -6022,7 +6057,7 @@ Nbcoos:AddButton({
     DoubleClick = false
 })
 
-local MenuGroup = Tabs.Settings:AddLeftGroupbox("菜单", "menu")
+local MenuGroup = Tabs.["UI Settings"]:AddLeftGroupbox("菜单", "menu")
 MenuGroup:AddToggle("KeybindMenuOpen", {
     Text = "显示按键绑定菜单",
     Default = Library.KeybindFrame.Visible,
