@@ -351,19 +351,19 @@ local ScriptCenter = {
 }
 
 local YX = Tabs.Main:AddLeftGroupbox("加载服务器")
-RightGroup:AddButton({
+YX:AddButton({
     Text = "MM2(破坏者谜团)",
     Func = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/Game/YX-HubMM2%E5%8A%A0%E5%AF%86%E8%84%9A%E6%9C%AC.lua"))()
     end
 })
-RightGroup:AddButton({
+YX:AddButton({
     Text = "一击竞技场",
     Func = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/Game/一击竞技场.lua"))()
     end
 })
-RightGroup:AddButton({
+YX:AddButton({
     Text = "伪装欺骗",
     Func = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/%E4%BC%AA%E8%A3%85%E6%AC%BA%E9%AA%97.lua"))()
