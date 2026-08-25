@@ -56,6 +56,30 @@ local ScriptCenterRightGroup = Tabs.ScriptCenter:AddRightGroupbox("脚本中心2
 local leftIndex = 0;
 local rightIndex = 0;
 
+for _, category in ipairs(ScriptCenter) do
+    local targetGroup = ((leftIndex <= rightIndex) and ScriptCenterLeftGroup) or ScriptCenterRightGroup;
+    if (((targetGroup == ScriptCenterLeftGroup) and (leftIndex > 0)) or ((targetGroup == ScriptCenterRightGroup) and (rightIndex > 0))) then
+        targetGroup:AddLabel("--------------------------------------------------------------------------------");
+    end
+    targetGroup:AddLabel(category.GroupName);
+    for _, btn in ipairs(category.List) do
+        targetGroup:AddButton({Text=btn.Name,Func=function()
+            local success, err = pcall(function()
+                local scriptContent = game:HttpGet(btn.Url);
+                local func = loadstring(scriptContent);
+                if func then
+                    func();
+                end
+            end);
+        end});
+    end
+    if (targetGroup == ScriptCenterLeftGroup) then
+        leftIndex = leftIndex + 1;
+    else
+        rightIndex = rightIndex + 1;
+    end
+end
+
 local ScriptCenter = {
     {
         GroupName = "各大脚本",
@@ -349,30 +373,6 @@ local ScriptCenter = {
         }
     }
 }
-
-for _, category in ipairs(ScriptCenter) do
-    local targetGroup = ((leftIndex <= rightIndex) and ScriptCenterLeftGroup) or ScriptCenterRightGroup;
-    if (((targetGroup == ScriptCenterLeftGroup) and (leftIndex > 0)) or ((targetGroup == ScriptCenterRightGroup) and (rightIndex > 0))) then
-        targetGroup:AddLabel("--------------------------------------------------------------------------------");
-    end
-    targetGroup:AddLabel(category.GroupName);
-    for _, btn in ipairs(category.List) do
-        targetGroup:AddButton({Text=btn.Name,Func=function()
-            local success, err = pcall(function()
-                local scriptContent = game:HttpGet(btn.Url);
-                local func = loadstring(scriptContent);
-                if func then
-                    func();
-                end
-            end);
-        end});
-    end
-    if (targetGroup == ScriptCenterLeftGroup) then
-        leftIndex = leftIndex + 1;
-    else
-        rightIndex = rightIndex + 1;
-    end
-end
 
 local LeftGroup = Tabs.Main:AddLeftGroupbox("主要功能（全部可在墨水使用）")
 local Afhubfygj = Tabs.Main:AddLeftGroupbox("翻译工具")
