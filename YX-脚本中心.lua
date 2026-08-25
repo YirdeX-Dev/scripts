@@ -350,7 +350,7 @@ local ScriptCenter = {
     }
 }
 
-local YX = Tabs.Main:AddLeftGroupbox("加载服务器")
+local YX = Tabs.YXIKB:AddLeftGroupbox("加载服务器")
 YX:AddButton({
     Text = "MM2(破坏者谜团)",
     Func = function()
@@ -371,7 +371,7 @@ YX:AddButton({
 })
 
 
-local Qczhdh = Tabs.Qczhdh:AddRightTabbox()
+local Qczhdh = Tabs.YXIKB:AddRightTabbox()
 local Tab2 = Qczhdh:AddTab("服务器","menu")
 Tab2:AddLabel("🟩MM2")
 Tab2:AddLabel("🟩一击竞技场")
@@ -425,7 +425,7 @@ local RotationControlGroup = Tabs.Main:AddRightGroupbox("旋转控制", "redo")
 
 Tabs.Main:UpdateWarningBox({
         Title = '脚本信息',
-        Text = '这里的功能请谨慎使用可能会被封禁，主要以缝合和二改不要再说我缝合我已经说了这个就是个缝合脚本中心OK？  \n致辞：秋辞 脚本中心汉化者：有芙同享  人机[<font color=\"rgb(255, 0, 0)\">谢谢您的使用，感谢大家</font>]',
+        Text = '这里的功能请谨慎使用可能会被封禁，主要以缝合和二改不要再说我缝合我已经说了这个就是个缝合脚本中心OK？',
         IsNormal = true,
         Visible = true,
         LockSize = true,
