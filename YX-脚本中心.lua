@@ -121,7 +121,7 @@ local ScriptCenter = {
     {
         GroupName = "各大脚本",
         List = {
-            {Name = "秋容脚本复刻版", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E7%A7%8B%E5%AE%B9%E8%84%9A%E6%9C%AC%E5%A4%8D%E5%88%BB%E7%89%88"},
+            {Name = "AF脚本脚本中心", Url = "https://api.jnkie.com/api/v1/luascripts/public/4e025c3c0ccda1554634165acb8f8ee2c1de5f0f8d7f60e7b396c622d7e6e9b0/download"},
             {Name = "叶脚本", Url = "https://raw.githubusercontent.com/roblox-ye/QQ515966991/refs/heads/main/ROBLOX-CNVIP-XIAOYE.lua"},
             {Name = "xk脚本", Url = "https://github.com/devslopo/DVES/raw/main/XK%20Hub"},
             {Name = "新版XA脚本", Url = "https://github.com/YunLua/Lua/raw/main/XA_Hub.lua"},
@@ -1231,7 +1231,7 @@ local function applyCharacterAppearance(character, userId)
     character.Parent = parent
 end
 Afhubfygj:AddButton({
-    Text = "翻译工具AF Hub",
+    Text = "翻译工具YX Hub",
     Func = function()
         local repo = 'https://raw.githubusercontent.com/KingScriptAE/No-sirve-nada./refs/heads/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
@@ -1242,7 +1242,7 @@ local Options = Library.Options
 local Toggles = Library.Toggles
 
 local Window = Library:CreateWindow({
-    Title = "AF Hub丨自动翻译",
+    Title = "YX Hub丨自动翻译",
     Footer = "By Linni",
     Icon = 122936242690381,
     NotifySide = "Right",
@@ -5118,7 +5118,7 @@ Cnmb:AddSlider("SpinSpeedSlider", {Text="旋转速度",Default=0,Min=0,Max=500,R
                 end
         end
 end});
-Cnmb:AddButton({Text="AF Hub飞行（秋辞飞行修复版）",Func=function()
+Cnmb:AddButton({Text="YX Hub飞行（秋辞飞行修复版）",Func=function()
         local main = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local up = Instance.new("TextButton")
@@ -8744,9 +8744,9 @@ MenuGroup:AddSlider("UICornerSlider", {
     end
 })
 MenuGroup:AddToggle('MyToggle', {
-    Text = 'AF贵宾标识',
+    Text = 'YX贵宾标识',
     Default = true,
-    Tooltip = '在头顶显示AF Hub贵宾动态标识',
+    Tooltip = '在头顶显示YX Hub贵宾动态标识',
     Callback = function(Value)
         local Players = game:GetService("Players")
         local TweenService = game:GetService("TweenService")
@@ -8774,7 +8774,7 @@ MenuGroup:AddToggle('MyToggle', {
             local textLabel = Instance.new("TextLabel")
             textLabel.Size = UDim2.new(1, 0, 1, 0)
             textLabel.BackgroundTransparency = 1
-            textLabel.Text = text or "AF贵宾"
+            textLabel.Text = text or "YX贵宾"
             textLabel.Font = Enum.Font.SourceSansBold
             textLabel.TextSize = 20
             textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -8809,11 +8809,11 @@ MenuGroup:AddToggle('MyToggle', {
         local function toggleText(enable)
             isEnabled = enable
             if enable then
-                if LP.Character then createFloatingText(LP, "AF Hub 贵宾") end
+                if LP.Character then createFloatingText(LP, "YX Hub 贵宾") end
                 if not charConn then
                     charConn = LP.CharacterAdded:Connect(function(character)
                         wait(0.5)
-                        if isEnabled then createFloatingText(LP, "AF Hub 贵宾") end
+                        if isEnabled then createFloatingText(LP, "YX Hub 贵宾") end
                     end)
                 end
             else
@@ -8826,7 +8826,7 @@ MenuGroup:AddToggle('MyToggle', {
         if WindUI and WindUI.Notify then
             WindUI:Notify({
                 Title = Value and "已开启" or "已关闭",
-                Content = Value and "AF贵宾标识已显示" or "AF贵宾标识已隐藏",
+                Content = Value and "YX贵宾标识已显示" or "YX贵宾标识已隐藏",
                 Duration = 2
             })
         end
@@ -8845,7 +8845,7 @@ MenuGroup:AddButton("卸载脚本", function()
     Library:Unload()
 end)
 
-Library:AddDraggableLabel("欢迎使用AF HUB\n科技与你无限\nAF重启未来")
+Library:AddDraggableLabel("欢迎使用YX HUB\n科技与你无限\nYX重启未来")
 Library.ToggleKeybind = Options.MenuKeybind
 
 ThemeManager:SetLibrary(Library)
@@ -8855,5 +8855,5 @@ ThemeManager:SetFolder("MyScriptTheme")
 SaveManager:SetFolder("MyScriptConfig")
 SaveManager:BuildConfigSection(Tabs.Settings)
 ThemeManager:ApplyToTab(Tabs.Settings)
-Library:Notify("AF Hub - AF Hub脚本中心 已加载", 3)
+Library:Notify("YX Hub - YX Hub脚本中心 已加载", 3)
 Library:Notify("尊贵的 " .. game.Players.LocalPlayer.Name .. " 欢迎使用", 3)
