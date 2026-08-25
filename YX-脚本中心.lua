@@ -111,13 +111,7 @@ local Tabs = {
     YXIKB = Window:AddTab("YX加载", "menu"),    
     Settings = Window:AddTab("设置", "settings"),
 }
-----------
-local ScriptCenterLeftGroup = Tabs.ScriptCenter:AddLeftGroupbox("脚本中心1");
-local ScriptCenterRightGroup = Tabs.ScriptCenter:AddRightGroupbox("脚本中心2");
-local leftIndex = 0;
-local rightIndex = 0;
-
-local ScriptCenter = {
+local scriptCategories = {
     {
         GroupName = "各大脚本",
         List = {
@@ -396,29 +390,52 @@ local ScriptCenter = {
     }
 }
 
-for _, category in ipairs(ScriptCenter) do
-    local targetGroup = ((leftIndex <= rightIndex) and ScriptCenterLeftGroup) or ScriptCenterRightGroup;
-    if (((targetGroup == ScriptCenterLeftGroup) and (leftIndex > 0)) or ((targetGroup == ScriptCenterRightGroup) and (rightIndex > 0))) then
-        targetGroup:AddLabel("--------------------------------------------------------------------------------");
+local function CreateScriptButton(group, scriptName, scriptUrl, isLeft)
+    local btn = group:AddButton({
+        Text = scriptName,
+        Func = function()
+            Library:Notify("YX正在努力加载: " .. scriptName, 3)
+            local success, result = pcall(function()
+                loadstring(game:HttpGet(scriptUrl))()
+            end)
+            if success then
+                Library:Notify("脚本加载成功: " .. scriptName, 3)
+            else
+                Library:Notify("加载失败: " .. tostring(result), 5)
+            end
+        end,
+        DoubleClick = false,
+    })
+    return btn
+end
+
+local function BuildScriptCenter()
+    local leftGroups = {}
+    local rightGroups = {}
+    local totalCategories = #scriptCategories
+    local halfCount = math.ceil(totalCategories / 2)
+    
+    -- 左侧GroupBoxes
+    for i = 1, halfCount do
+        local category = scriptCategories[i]
+        local group = Tabs.ScriptCenter:AddLeftGroupbox(category.GroupName, "folder")
+        leftGroups[#leftGroups + 1] = group
+        
+        for _, script in ipairs(category.List) do
+            CreateScriptButton(group, script.Name, script.Url, true)
+        end
     end
-    targetGroup:AddLabel(category.GroupName);
-    for _, btn in ipairs(category.List) do
-        targetGroup:AddButton({Text=btn.Name,Func=function()
-            local success, err = pcall(function()
-                local scriptContent = game:HttpGet(btn.Url);
-                local func = loadstring(scriptContent);
-                if func then
-                    func();
-                end
-            end);
-        end});
-    end
-    if (targetGroup == ScriptCenterLeftGroup) then
-        leftIndex = leftIndex + 1;
-    else
-        rightIndex = rightIndex + 1;
+    for i = halfCount + 1, totalCategories do
+        local category = scriptCategories[i]
+        local group = Tabs.ScriptCenter:AddRightGroupbox(category.GroupName, "folder")
+        rightGroups[#rightGroups + 1] = group
+        
+        for _, script in ipairs(category.List) do
+            CreateScriptButton(group, script.Name, script.Url, false)
+        end
     end
 end
+BuildScriptCenter()
 
 local YX = Tabs.YXIKB:AddLeftGroupbox("加载服务器")
 YX:AddButton({
@@ -6101,389 +6118,6 @@ Nbcoos:AddButton({
     end,
     DoubleClick = false
 })
-
-local scriptCategories = {
-    {
-        GroupName = "各大脚本（通用功能）",
-        List = {
-            {Name = "AF脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/YX-HubLoader.lua"},
-            {Name = "AFHub脚本（新windui）", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E7%A7%8B%E8%BE%9E%E8%84%9A%E6%9C%AC%E6%9C%80%E6%96%B04.0%E8%84%9A%E6%9C%AC"},
-            {Name = "秋容脚本复刻版", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E7%A7%8B%E5%AE%B9%E8%84%9A%E6%9C%AC%E5%A4%8D%E5%88%BB%E7%89%88"},
-            {Name = "叶脚本", Url = "https://raw.githubusercontent.com/roblox-ye/QQ515966991/refs/heads/main/ROBLOX-CNVIP-XIAOYE.lua"},
-            {Name = "xk脚本", Url = "https://github.com/devslopo/DVES/raw/main/XK%20Hub"},
-            {Name = "皮脚本", Url = "https://raw.githubusercontent.com/xiaopi77/xiaopi77/main/QQ1002100032-Roblox-Pi-script.lua"},
-            {Name = "落叶脚本", Url = "https://raw.githubusercontent.com/krlpl/Deciduous-center-LS/main/%E8%90%BD%E5%8F%B6%E4%B8%AD%E5%BF%83%E6%B7%B7%E6%B7%86.txt"},
-            {Name = "Rb脚本中心＿汉化中心", Url = "https://api.luarmor.net/files/v3/loaders/4fe525637e43a1be8cb0cdf902d107c2.lua"},
-            {Name = "NOL免费版", Url = "https://raw.githubusercontent.com/Syndromehsh/BETA2/refs/heads/main/NOL"},
-            {Name = "Rb脚本中心", Url = "https://raw.githubusercontent.com/Yungengxin/roblox/refs/heads/main/Rb-Hub"},
-            {Name = "sa脚本", Url = "https://raw.githubusercontent.com/Bebo-Mods/BeboScripts/main/StandAwekening.lua"},
-            {Name = "霖溺通用", Url = "https://raw.githubusercontent.com/ShenJiaoBen/Partial-Server-Ribbon/refs/heads/main/Linni_Universal.txt"},
-            {Name = "夜脚本", Url = "https://raw.githubusercontent.com/ylt410/roblox-Script/refs/heads/main/yejiaoben"},
-            {Name = "黑白脚本", Url = "https://raw.githubusercontent.com/tfcygvunbind/Apple/main/黑白脚本加载器'))()"},
-            {Name = "史蒂夫建造脚本", Url = "https://raw.githubusercontent.com/ian49972/SCRIPTS/refs/heads/main/Steve"},
-            {Name = "火车头脚本", Url = "https://raw.githubusercontent.com/giobolqv1/A-Train-by-GioBolqv1-/refs/heads/main/train.lua"},
-            {Name = "隐身脚本", Url = "https://rawscripts.net/raw/Universal-Script-Invisible-script-20557"},
-            {Name = "全能侠脚本脚本", Url = "https://raw.githubusercontent.com/giobolqvi1/Omni-man-fly-by-GioBolqv1/refs/heads/main/omniman.lua"},
-            {Name = "通用聊天脚本", Url = "https://raw.githubusercontent.com/dawwiqingyi/daweiqingyi/refs/heads/main/chat"},
-        }
-    },
-    {
-        GroupName = "99夜",
-        List = {
-            {Name = "99夜脚本可杀队友", Url = "https://raw.githubusercontent.com/358545698555/roblox-/refs/heads/main/%E5%8F%AF%E6%9D%80%E9%98%9F%E5%8F%8B99%E5%A4%9C"},
-            {Name = "99夜脚本", Url = "https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"},
-            {Name = "99夜脚本2", Url = "https://pastebin.com/raw/gHQGTNYH"},
-            {Name = "Fainl99夜", Url = "https://raw.githubusercontent.com/kyruxv1/final/refs/heads/main/final-99-nitf"},
-        }
-    },
-    {
-        GroupName = "亡命速递",
-        List = {
-            {Name = "亡命速递英文脚本", Url = "https://raw.githubusercontent.com/xxdaysheus01/RuneX/refs/heads/main/DeadlyDeliveryScript.lua"},
-            {Name = "亡命速递", Url = "https://pandadevelopment.net/virtual/file/c96973c95ae3aaec"},
-            {Name = "亡命速递（霜溺）", Url = "https://raw.githubusercontent.com/ShenJiaoBen/ScriptLoader/refs/heads/main/Linni_FreeLoader.lua"},
-        }
-    },
-    {
-        GroupName = "死铁轨",
-        List = {
-            {Name = "仿红叶脚本汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E4%BB%BF%E7%BA%A2%E5%8F%B6%E8%84%9A%E6%9C%AC%E6%B1%89%E5%8C%96"},
-            {Name = "红叶脚本", Url = "https://getnative.cc/script/loader"},
-            {Name = "速通脚本汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E6%AD%BB%E9%93%81%E8%BD%A8%E6%B1%89%E5%8C%96%E8%84%9A%E6%9C%AC"},
-            {Name = "死铁轨脚本(好用)", Url = "https://raw.githubusercontent.com/kiciahook/kiciahook/refs/heads/main/loader.lua"},
-            {Name = "ringta死铁轨脚本", Url = "https://raw.githubusercontent.com/erewe23/deadrailsring.github.io/refs/heads/main/ringta.lua"},
-            {Name = "DM死铁轨脚本", Url = "https://raw.githubusercontent.com/shenmi9178/Dong-s-script/refs/heads/main/DM%E6%AD%BB%E9%93%81%E8%BD%A8.lua"},
-            {Name = "死铁轨刷债券脚本", Url = "https://raw.githubusercontent.com/JsYb666/Item/refs/heads/main/Bond-V6.5"},
-            {Name = "BHBUO死铁轨刷债券脚本", Url = "https://raw.githubusercontent.com/jbu7666gvv/BHBUO/refs/heads/main/bondV4.lua"},
-            {Name = "死铁轨无卡密刷债券脚本", Url = "https://raw.githubusercontent.com/ArdyBotzz/NatHub/refs/heads/master/NatHub.lua"},
-            {Name = "最新死铁轨刷债券脚本", Url = "https://raw.githubusercontent.com/erewe23/deadrailsring.github.io/refs/heads/main/ringta.lua"},
-        }
-    },
-    {
-        GroupName = "墨水游戏",
-        List = {
-            {Name = "AX-inggame 有芙同享汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/ax%E8%84%9A%E6%9C%AC%E7%A7%8B%E8%BE%9E%E6%B1%89%E5%8C%96"},
-            {Name = "天使之翼秋辞汉化", Url = "https://vss.pandauth.com/kv/ee319aed59b889ce"},
-            {Name = "UWU秋辞汉化", Url = "https://vss.pandauth.com/kv/d6ae89cb631418cf"},
-            {Name = "墨水新版Ringta汉化(无卡密)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/RG%E5%A2%A8%E6%B0%B4%E6%B1%89%E5%8C%96"},
-            {Name = "墨水新版甩飞脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/Miscs/refs/heads/main/自动甩飞.lua"},
-            {Name = "HSX墨水游戏脚本汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E9%9C%8D%E5%88%A9%E6%B1%89%E5%8C%96%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F"},
-            {Name = "墨水游戏新版Void虚空脚本", Url = "https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/inkgame.lua"},
-        }
-    },
-    {
-        GroupName = "doors",
-        List = {
-            {Name = "doorsDP汉化脚本", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/doors-DP-robot"},
-            {Name = "doors abysall汉化脚本", Url = "https://raw.githubusercontent.com/atnew2025/Chinese-scripts/refs/heads/main/Abysallcn-hub"},
-            {Name = "doors脚本", Url = "https://raw.githubusercontent.com/bocaj111004/Abysall/refs/heads/main/Loader.luau"},
-            {Name = "Abysall脚本", Url = "https://raw.githubusercontent.com/XxwanhexxX/doors-zh/refs/heads/main/Abysall.Hub"},
-        }
-    },
-    {
-        GroupName = "监狱生活",
-        List = {
-            {Name = "监狱生活汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E7%9B%91%E7%8B%B1%E7%94%9F%E6%B4%BB%E8%84%9A%E6%9C%AC"},
-        }
-    },
-    {
-        GroupName = "战争大亨",
-        List = {
-            {Name = "战争大亨最强脚本", Url = "https://raw.githubusercontent.com/MaxPikaa/PureLove/refs/heads/main/520"},
-            {Name = "战争大亨无卡密高级脚本", Url = "https://raw.githubusercontent.com/Macintosh1983/ChillHubMain/main/ChillHubOilWarfareTycoon.lua"},
-        }
-    },
-    {
-        GroupName = "被遗弃",
-        List = {
-            {Name = "被遗弃英文无卡密", Url = "https://github.com/shenxiuqi974/guesting-but-chinese/releases/download/hushwhw/default.txt"},
-            {Name = "被遗弃英文无卡密(好用)", Url = "https://pastebin.com/raw/zH9Extzk"},
-            {Name = "XA被遗弃脚本(无卡密中文)", Url = "https://raw.gitcode.com/XiaoYunUwU/XA/raw/main/Loader.lua"},
-            {Name = "2026最新脚本", Url = "https://raw.githubusercontent.com/aibabylaugh/catsaken-real-script-not-assets/refs/heads/main/obfuscated-1448974601077002340.lua"},
-            {Name = "新被遗弃脚本", Url = "https://api.jnkie.com/api/v1/luascripts/public/d36d2b96db2abcbb0f20b5c556b53cc5260ff74db0f8bfc3bea83eaa1da7947f/download"},
-            {Name = "NOL被遗弃脚本（英文）", Url = "https://raw.githubusercontent.com/Syndromehsh/-/refs/heads/ISIS-%E8%A2%AB%E9%81%97%E5%BC%83/%E4%B8%8D%E8%A6%81%E5%91%8A%E8%AF%89%E4%BB%BB%E4%BD%95%E4%BA%BA%E5%93%9F%5B/%E5%B8%8C%E7%9A%AE%E7%AC%91%E8%84%B8%5D"},
-        }
-    },
-    {
-        GroupName = "俄亥俄州",
-        List = {
-            {Name = "俄亥俄州KRC脚本", Url = "https://raw.githubusercontent.com/FakeW0rld/lagct/refs/heads/main/ohio.lua"},
-            {Name = "俄亥俄州自动捡彩蛋脚本", Url = "https://pastebin.com/raw/TrPbSbkm"},
-            {Name = "Rb脚本俄亥俄州", Url = "https://raw.githubusercontent.com/Yungengxin/roblox/refs/heads/main/RbHub-OHIO"},
-            {Name = "俄亥俄州脚本", Url = "https://pastebin.com/raw/GUmp28kq"},
-        }
-    },
-    {
-        GroupName = "通缉脚本",
-        List = {
-            {Name = "通缉", Url = "https://raw.githubusercontent.com/combatlegnd/combatlegnd/refs/heads/main/NH-Loader"},
-        }
-    },
-    {
-        GroupName = "闪光",
-        List = {
-            {Name = "闪光脚本", Url = "https://apigetunx.vercel.app/UNX.lua"},
-            {Name = "闪光脚本(英文)", Url = "https://raw.githubusercontent.com/Jager-Hub/Scripts/refs/heads/main/loader.lua"},
-        }
-    },
-    {
-        GroupName = "最坚强的战场",
-        List = {
-            {Name = "最强战场Phantasm汉化脚本", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/thestongestbattlegrounds-Phantasm-robot"},
-            {Name = "最坚强的战场脚本2", Url = "https://raw.githubusercontent.com/ke9460394-dot/ugik/refs/heads/main/phantasm.lua"},
-            {Name = "最坚强的战场脚本(好用)", Url = "https://eltonshub-loader.netlify.app/UBG1.lua"},
-            {Name = "最坚强的战场open脚本", Url = "https://api.luarmor.net/files/v3/loaders/6f502e252308fb97855295005faa73a0.lua"},
-        }
-    },
-    {
-        GroupName = "偷走脑红",
-        List = {
-            {Name = "偷走脑红KURD汉化脚本", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/Brainrot-KURD-robot"},
-        }
-    },
-    {
-        GroupName = "竞争对手",
-        List = {
-            {Name = "竞争对手脚本汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/竞争对手汉化脚本"},
-        }
-    },
-    {
-        GroupName = "chain脚本",
-        List = {
-            {Name = "chain英文脚本", Url = "https://api.getpolsec.com/scripts/hosted/79fcede2ce14619990c741986e6123ddbc41cd9e4a25c4dc4da13c5f63a25f2b.lua"},
-        }
-    },
-    {
-        GroupName = "死亡球",
-        List = {
-            {Name = "死亡球Fluxin汉化脚本(要卡密)", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/deathball-Fluxin-robot"},
-            {Name = "死亡球stark汉化脚本(要卡密)", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/Deathballs-stark-robot"},
-        }
-    },
-    {
-        GroupName = "监狱人生",
-        List = {
-            {Name = "监狱人生人机汉化脚本", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/PrisonLife-Serk4rx-robot"},
-        }
-    },
-    {
-        GroupName = "逃脱海啸",
-        List = {
-            {Name = "逃脱海啸并带走红Merqur汉化脚本(要卡密)", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/EscapeTsunamiForBrinrots-Merqury-robot"},
-        }
-    },
-    {
-        GroupName = "盲射",
-        List = {
-            {Name = "盲射ToraIsMe汉化脚本", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/blindshot-ToraIsMe-robot"},
-        }
-    },
-    {
-        GroupName = "彩虹朋友",
-        List = {
-            {Name = "彩虹朋友二UB汉化脚本(要卡密)", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/RainbowFriends-UB-robot"},
-        }
-    },
-    {
-        GroupName = "撕咬之夜",
-        List = {
-            {Name = "撕咬之夜", Url = "https://raw.githubusercontent.com/Youfutongxiang1/Msploit-v2-CN/refs/heads/main/Msploit-v2-CN"},
-            {Name = "殺脚本撕咬之夜", Url = "https://raw.githubusercontent.com/FengYu-X/Max/refs/heads/X/BBN.lua"},
-            {Name = "Ringta撕咬之夜(汉化)", Url = "https://raw.githubusercontent.com/Youfutongxiang1/RINGTA-BitebyNight-CN/refs/heads/main/RINGTA/Bite%20by%20Night-CN"},
-            {Name = "撕咬之夜", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/Cerberus"},
-            {Name = "撕咬之夜杀戮脚本", Url = "https://raw.githubusercontent.com/FengYu-X/Max/refs/heads/X/BBN.lua"},
-        }
-    },
-    {
-        GroupName = "死刑",
-        List = {
-            {Name = "死刑脚本(无卡密)", Url = "https://api.luarmor.net/files/v3/loaders/8c08b8f2252eec7dbb77d253d269bb65.lua"},
-        }
-    },
-    {
-        GroupName = "活了7天",
-        List = {
-            {Name = "活了7天刷废料", Url = "https://raw.githubusercontent.com/rndmq/Serverlist/refs/heads/main/Server87"},
-            {Name = "活了7天汉化", Url = "https://raw.githubusercontent.com/ke9460394-dot/ugik/refs/heads/main/%E4%B8%83%E6%97%A5%E7%94%9F%E6%88%90kkk.txt"},
-            {Name = "活了7天脚本", Url = "https://rawscripts.net/raw/7-Days-To-Live-Bhfhd-38003"},
-        }
-    },
-    {
-        GroupName = "终极战场",
-        List = {
-            {Name = "终极战场脚本", Url = "https://raw.githubusercontent.com/YQANTGV3/YQANTGV3/refs/heads/main/antitamper.txt"},
-        }
-    },
-    {
-        GroupName = "恐鬼症",
-        List = {
-            {Name = "恐鬼症付费脚本(免费用)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E6%81%90%E9%AC%BC%E7%97%87"},
-        }
-    },
-    {
-        GroupName = "力量传奇",
-        List = {
-            {Name = "Yttrium力量传奇付费脚本(免费用)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E5%8A%9B%E9%87%8F%E4%BC%A0%E5%A5%87%E8%84%9A%E6%9C%AC"},
-        }
-    },
-    {
-        GroupName = "通缉",
-        List = {
-            {Name = "Yttrium通缉付费脚本(免费用)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E9%80%9A%E7%BC%89%E8%84%9A%E6%9C%AC%E5%85%8D%E8%B4%B9%E7%89%88"},
-        }
-    },
-    {
-        GroupName = "GB内脏与黑火药",
-        List = {
-            {Name = "GB汉化脚本(需要解卡和AX一样)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/AF%20%E7%A7%8B%E5%AE%B9GB"},
-        }
-    },
-    {
-        GroupName = "犯罪",
-        List = {
-            {Name = "犯罪脚本付费版(免费用)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E7%8A%AF%E7%BD%AA"},
-        }
-    },
-    {
-        GroupName = "穷小子打工记",
-        List = {
-            {Name = "神青穷小子打工记", Url = "https://raw.githubusercontent.com/gycgchgyfytdttr/QQ-9-2-8-9-50173/refs/heads/main/newsqnb.lua"},
-        }
-    },
-    {
-        GroupName = "恶魔学",
-        List = {
-            {Name = "恶魔学脚本", Url = "https://raw.githubusercontent.com/NUIke1/Sentinel/refs/heads/main/%E5%93%A8%E5%85%B5-%E6%81%B6%E9%AD%94%E5%AD%A6.lua"},
-            {Name = "恶魔学脚本", Url = "https://raw.githubusercontent.com/chillunsk/Demonology_Script/refs/heads/main/Demonology_Script"},
-        }
-    },
-    {
-        GroupName = "动物医院",
-        List = {
-            {Name = "动物医院脚本", Url = "https://raw.githubusercontent.com/caomod2077/Script/main/FN_AnimalHospital.lua"},
-            {Name = "动物医院脚本", Url = "https://raw.githubusercontent.com/meobeo8/a/a/a"},
-        }
-    },
-    {
-        GroupName = "自然灾害",
-        List = {
-            {Name = "祖国人脚本", Url = "https://raw.githubusercontent.com/giobolqv1/homelander-by-GioBolqv1-/main/homelander.lua"},
-            {Name = "全能侠脚本", Url = "https://raw.githubusercontent.com/giobolqvi1/Omni-man-fly-by-GioBolqv1/refs/heads/main/omniman.lua"},
-        }
-    },
-    {
-        GroupName = "下一个机器人",
-        List = {
-            {Name = "下一个机器人脚本", Url = "https://gist.githubusercontent.com/olivernodex/e77feda9ee5cafac0a0a26d63ecbad5e/raw/NicosMenu.lua"},
-        }
-    },
-    {
-        GroupName = "种植花园",
-        List = {
-            {Name = "种植花园脚本", Url = "https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua"},
-        }
-    },
-    {
-        GroupName = "画我",
-        List = {
-            {Name = "新版画我脚本", Url = "https://raw.githubusercontent.com/losermancracker-byte/scripts/refs/heads/main/draw%20me%20v1%20-%202"},
-        }
-    },
-    {
-        GroupName = "暴力区",
-        List = {
-            {Name = "暴力区脚本", Url = "https://raw.githubusercontent.com/giobolqvi1/Omni-man-fly-by-GioBolqv1/refs/heads/main/omniman.lua"},
-        }
-    },
-    {
-        GroupName = "大力士模拟",
-        List = {
-            {Name = "大力士模拟脚本", Url = "https://raw.githubusercontent.com/colcoclc/Strongman-Simulator-Script-zorvixa./refs/heads/main/strongman.lua"},
-        }
-    },
-    {
-        GroupName = "住宅大逃杀",
-        List = {
-            {Name = "NOL住宅大逃杀脚本", Url = "https://api.luarmor.net/files/v4/loaders/9c5f89b2bd136de9f2600002a087c2e8.lua"},
-        }
-    },
-    {
-        GroupName = "采山峰",
-        List = {
-            {Name = "无卡密采山峰脚本", Url = "https://api.jnkie.com/api/v1/luascripts/public/cbe5ca38cd8f3bce26a47585fbeb87456d93f5354f7be8a4d6b3025f3f700414/download"},
-        }
-    },
-    {
-        GroupName = "开采一座山",
-        List = {
-            {Name = "开采一座山脚本", Url = "https://raw.githubusercontent.com/ApelsinkaFr/ApelHub/refs/heads/main/ApelHub"},
-        }
-    },
-    {
-        GroupName = "元素力量大亨",
-        List = {
-            {Name = "元素力量大亨脚本", Url = "https://raw.githubusercontent.com/kichetvip/Script/refs/heads/main/Kiethub-EPT"},
-        }
-    },
-    {
-        GroupName = "鸡肉传奇",
-        List = {
-            {Name = "鸡肉传奇脚本", Url = "https://raw.githubusercontent.com/toxicity-561/Proton-Hub/refs/heads/main/Muscle-Legends.luau"},
-        }
-    },
-    {
-        GroupName = "破坏者谜团",
-        List = {
-            {Name = "破坏者谜团脚本", Url = "https://pastebin.com/raw/VRwdkSG3"},
-        }
-    }
-}
-local function CreateScriptButton(group, scriptName, scriptUrl, isLeft)
-    local btn = group:AddButton({
-        Text = scriptName,
-        Func = function()
-            Library:Notify("秋辞正在努力加载: " .. scriptName, 3)
-            local success, result = pcall(function()
-                loadstring(game:HttpGet(scriptUrl))()
-            end)
-            if success then
-                Library:Notify("脚本加载成功: " .. scriptName, 3)
-            else
-                Library:Notify("加载失败: " .. tostring(result), 5)
-            end
-        end,
-        DoubleClick = false,
-    })
-    return btn
-end
-
-local function BuildScriptCenter()
-    local leftGroups = {}
-    local rightGroups = {}
-    local totalCategories = #scriptCategories
-    local halfCount = math.ceil(totalCategories / 2)
-    
-    -- 左侧GroupBoxes
-    for i = 1, halfCount do
-        local category = scriptCategories[i]
-        local group = Tabs.ScriptCenter:AddLeftGroupbox(category.GroupName, "folder")
-        leftGroups[#leftGroups + 1] = group
-        
-        for _, script in ipairs(category.List) do
-            CreateScriptButton(group, script.Name, script.Url, true)
-        end
-    end
-    for i = halfCount + 1, totalCategories do
-        local category = scriptCategories[i]
-        local group = Tabs.ScriptCenter:AddRightGroupbox(category.GroupName, "folder")
-        rightGroups[#rightGroups + 1] = group
-        
-        for _, script in ipairs(category.List) do
-            CreateScriptButton(group, script.Name, script.Url, false)
-        end
-    end
-end
-BuildScriptCenter()
 
 Tabs.Afhubyyds:UpdateWarningBox({
         Title = '付费信息',
