@@ -350,41 +350,6 @@ local ScriptCenter = {
     }
 }
 
-local YX = Tabs.YXIKB:AddLeftGroupbox("加载服务器")
-YX:AddButton({
-    Text = "MM2(破坏者谜团)",
-    Func = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/Game/YX-HubMM2%E5%8A%A0%E5%AF%86%E8%84%9A%E6%9C%AC.lua"))()
-    end
-})
-YX:AddButton({
-    Text = "一击竞技场",
-    Func = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/Game/一击竞技场.lua"))()
-    end
-})
-YX:AddButton({
-    Text = "伪装欺骗",
-    Func = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/%E4%BC%AA%E8%A3%85%E6%AC%BA%E9%AA%97.lua"))()
-    end
-})
-
-
-local Qczhdh = Tabs.YXIKB:AddRightTabbox()
-local Tab2 = Qczhdh:AddTab("服务器","menu")
-Tab2:AddLabel("🟩MM2")
-Tab2:AddLabel("🟩一击竞技场")
-Tab2:AddLabel("🟩伪装欺骗")
-
-
-local Tab1 = Qczhdh:AddTab("服务器状态", "menu")
-Tab1:AddLabel("🟩可用")
-Tab1:AddLabel("🟨可用但有缺陷")
-Tab1:AddLabel("⬛已停更")
-
-
-
 for _, category in ipairs(ScriptCenter) do
     local targetGroup = ((leftIndex <= rightIndex) and ScriptCenterLeftGroup) or ScriptCenterRightGroup;
     if (((targetGroup == ScriptCenterLeftGroup) and (leftIndex > 0)) or ((targetGroup == ScriptCenterRightGroup) and (rightIndex > 0))) then
@@ -6056,6 +6021,39 @@ Nbcoos:AddButton({
     end,
     DoubleClick = false
 })
+
+local YX = Tabs.YXIKB:AddLeftGroupbox("加载服务器")
+YX:AddButton({
+    Text = "MM2(破坏者谜团)",
+    Func = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/Game/YX-HubMM2%E5%8A%A0%E5%AF%86%E8%84%9A%E6%9C%AC.lua"))()
+    end
+})
+YX:AddButton({
+    Text = "一击竞技场",
+    Func = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/Game/一击竞技场.lua"))()
+    end
+})
+YX:AddButton({
+    Text = "伪装欺骗",
+    Func = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/%E4%BC%AA%E8%A3%85%E6%AC%BA%E9%AA%97.lua"))()
+    end
+})
+
+
+local Qczhdh = Tabs.YXIKB:AddRightTabbox()
+local Tab2 = Qczhdh:AddTab("服务器","menu")
+Tab2:AddLabel("🟩MM2")
+Tab2:AddLabel("🟩一击竞技场")
+Tab2:AddLabel("🟩伪装欺骗")
+
+
+local Tab1 = Qczhdh:AddTab("服务器状态", "menu")
+Tab1:AddLabel("🟩可用")
+Tab1:AddLabel("🟨可用但有缺陷")
+Tab1:AddLabel("⬛已停更")
 
 local MenuGroup = Tabs.["UI Settings"]:AddLeftGroupbox("菜单", "menu")
 MenuGroup:AddToggle("KeybindMenuOpen", {
