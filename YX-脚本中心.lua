@@ -64,12 +64,7 @@ local Tabs = {
     YXIKB = Window:AddTab("YX加载", "menu"),    
     Settings = Window:AddTab("设置", "settings"),
 }
-local ScriptCenterLeftGroup = Tabs.ScriptCenter:AddLeftGroupbox("脚本中心1");
-local ScriptCenterRightGroup = Tabs.ScriptCenter:AddRightGroupbox("脚本中心2");
-local leftIndex = 0;
-local rightIndex = 0;
-
-local ScriptCenter = {
+local scriptCategories = {
     {
         GroupName = "各大脚本",
         List = {
@@ -347,7 +342,6 @@ local ScriptCenter = {
         }
     }
 }
-
 local function CreateScriptButton(group, scriptName, scriptUrl, isLeft)
     local btn = group:AddButton({
         Text = scriptName,
