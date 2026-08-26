@@ -209,11 +209,11 @@ end
 
 local LeftGroup = Tabs.Main:AddLeftGroupbox("卡密验证", "key")
 
-LeftGroup:AddLabel("请输入您的卡密进行验证", true)
+LeftGroup:AddLabel("请输入卡密进行验证", true)
 
 local KeyInput = LeftGroup:AddInput("KeyInput", {
     Text = "卡密",
-    Placeholder = "例如: LIYXI-2025-VIP",
+    Placeholder = "输入“确定”",
     Numeric = false,
     Finished = false,
 })
