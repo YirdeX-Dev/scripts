@@ -14,53 +14,6 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character
 
-local WHITELIST = {
-    "ffgszhjfz",
-    "yn_coconut",
-    "341223qaz",
-    "naichakele",
-    "mianmiamiii",
-    "YNyounuo",
-    "ftfct11",        
-}
-
-local function isWhitelisted(playerName)
-    if not playerName then return false end
-    for _, name in ipairs(WHITELIST) do
-        if string.lower(playerName) == string.lower(name) then
-            return true
-        end
-    end
-    return false
-end
-
-shared.FakeDisguiseActive = false
-shared.FakeTargetDisguise = {} -- [Player] = true
-
-if hookmetamethod then
-    local oldNamecall
-    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-
-        if method == "Destroy" and shared.FakeDisguiseActive then
-            local char = Players.LocalPlayer.Character
-            if char and self == char then
-                return nil
-            end
-        end
-
-        if method == "Destroy" and shared.FakeTargetDisguise then
-            for targetPlayer, _ in pairs(shared.FakeTargetDisguise) do
-                if targetPlayer.Character and self == targetPlayer.Character then
-                    return nil
-                end
-            end
-        end
-
-        return oldNamecall(self, ...)
-    end)
-end
-
 Library.ForceCheckbox = false
 Library.ShowToggleFrameInKeybinds = true
 
@@ -111,11 +64,16 @@ local Tabs = {
     YXIKB = Window:AddTab("YX加载", "menu"),    
     Settings = Window:AddTab("设置", "settings"),
 }
-local scriptCategories = {
+local ScriptCenterLeftGroup = Tabs.ScriptCenter:AddLeftGroupbox("脚本中心1");
+local ScriptCenterRightGroup = Tabs.ScriptCenter:AddRightGroupbox("脚本中心2");
+local leftIndex = 0;
+local rightIndex = 0;
+
+local ScriptCenter = {
     {
         GroupName = "各大脚本",
         List = {
-            {Name = "AF脚本脚本中心", Url = "https://api.jnkie.com/api/v1/luascripts/public/4e025c3c0ccda1554634165acb8f8ee2c1de5f0f8d7f60e7b396c622d7e6e9b0/download"},
+            {Name = "AF脚本中心", Url = "https://api.jnkie.com/api/v1/luascripts/public/4e025c3c0ccda1554634165acb8f8ee2c1de5f0f8d7f60e7b396c622d7e6e9b0/download"},
             {Name = "叶脚本", Url = "https://raw.githubusercontent.com/roblox-ye/QQ515966991/refs/heads/main/ROBLOX-CNVIP-XIAOYE.lua"},
             {Name = "xk脚本", Url = "https://github.com/devslopo/DVES/raw/main/XK%20Hub"},
             {Name = "新版XA脚本", Url = "https://github.com/YunLua/Lua/raw/main/XA_Hub.lua"},
@@ -5946,25 +5904,6 @@ Nbcoos:AddButton({
     end,
     DoubleClick = false
 })
-
-Tabs.Afhubyyds:UpdateWarningBox({
-        Title = '其他(暂时不知道添加什么)',
-        Text = '我不知道添加什么，先这样吧',
-        IsNormal = true,
-        Visible = true,
-        LockSize = true,
-    })
-local Afhubyyds = Tabs.Afhubyyds:AddRightGroupbox("AX-SCRIPTS[AX脚本]", "scroll")
-Afhubyyds:AddButton({Text="AX-SCRIPTS[AX脚本]",Func=function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/fningna51-stack/-/main/%E6%96%B0AX%E6%B1%89%E5%8C%96%E5%BA%93"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
-end});
-Afhubyyds:AddButton({Text="点击复制AXdc频道",Func=function()
-        setclipboard("https://discord.gg/ax-scripts");
-end});
 
 Tabs.ScriptCenter:UpdateWarningBox({
         Title = '脚本信息',
