@@ -39,6 +39,10 @@ local Window = Library:CreateWindow({
     ShowCustomCursor = true,
     IconSize = UDim2.fromOffset(35, 35),
     Resizable = true,
+    BackgroundImage = "rbxassetid://123887383447725",--这里改你的图片背景
+	BackgroundTransparency = 0.3, 
+	BackgroundColor = Color3.fromRGB(0, 0, 0),
+
     MobileButtonsSide = "Left",
     DisableSearch = false,
     SearchbarSize = UDim2.new(0.8, 0, 1, 0),
@@ -126,9 +130,8 @@ local scriptCategories = {
         GroupName = "墨水游戏",
         List = {
             {Name = "AX-有芙同享汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/ax%E8%84%9A%E6%9C%AC%E7%A7%8B%E8%BE%9E%E6%B1%89%E5%8C%96"},
-            {Name = "AX-YirdeX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/Ax%E6%B1%89%E5%8C%96%E8%84%9A%E6%9C%AC"},   
              {Name = "HSX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/HSX%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F"},   
-            {Name = "墨水Ringta汉化", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/RINGTA/ink%20Game.lua"},
+            {Name = "墨水Ringta汉化", Url = "https://raw.githubusercontent.com/hdjsjjdgrhj/script-hub/refs/heads/main/Ringta"},
             {Name = "Unm汉化，卡密ink50", Url = "https://raw.githubusercontent.com/Youfutongxiang1/unm-CN/refs/heads/main/README.md"},
         }
     },
@@ -6057,6 +6060,67 @@ MenuGroup:AddLabel("菜单快捷键")
 MenuGroup:AddButton("卸载脚本", function()
     Library:Unload()
 end)
+
+local Bjtsz = Tabs.Settings:AddRightGroupbox("图片切换", "gallery-vertical-end"
+
+Bjtsz:AddButton({
+    Text = '加载背景图片1',
+    Func = function()
+        local imageId = "84371548883810"
+        local fullImagePath = "rbxassetid://" .. imageId        
+        Library:Notify("正在加载背景图片...", 3)
+        print('尝试加载图片ID:', imageId)        
+        local success, result = pcall(function()
+            if Window.Gui and Window.Gui:IsA("Frame") then
+                Window.Gui.BackgroundImage = fullImagePath
+                Library:Notify("背景图片加载成功！", 3)
+                print('背景图片已设置 (方法1)')
+                return
+            end            
+            if Window.SetBackgroundImage then
+                Window:SetBackgroundImage(fullImagePath)
+                Library:Notify("背景图片加载成功！", 3)
+                print('背景图片已设置 (方法2)')
+                return
+            end           
+            local gui = Window.Gui or Window._gui or Window.__gui
+            if gui then
+                local function findAndSetBackground(obj)
+                    if obj:IsA("Frame") and (obj.BackgroundImage == "" or obj.BackgroundImage == nil) then
+                        if obj.Size == UDim2.new(1, 0, 1, 0) or obj.Position == UDim2.new(0, 0, 0, 0) then
+                            obj.BackgroundImage = fullImagePath
+                            Library:Notify("背景图片加载成功！", 3)
+                            print('背景图片已设置 (方法3)')
+                            return true
+                        end
+                    end
+                    for _, child in ipairs(obj:GetChildren()) do
+                        if findAndSetBackground(child) then
+                            return true
+                        end
+                    end
+                    return false
+                end                
+                if findAndSetBackground(gui) then
+                    return
+                end
+            end            
+            if Library.SetBackgroundImage then
+                Library:SetBackgroundImage(fullImagePath)
+                Library:Notify("背景图片加载成功！", 3)
+                print('背景图片已设置 (方法4)')
+                return
+            end           
+            Library:Notify("背景图片加载失败，请检查图片ID", 5)
+            print('所有方法都失败了')
+        end)        
+        if not success then
+            Library:Notify("加载出错: " .. tostring(result), 5)
+            print('加载错误:', result)
+        end
+    end,
+    DoubleClick = false,
+})
 
 Library:AddDraggableLabel("欢迎使用YX HUB\n科技与你无限\nYX重启未来")
 Library.ToggleKeybind = Options.MenuKeybind
