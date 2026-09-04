@@ -39,10 +39,6 @@ local Window = Library:CreateWindow({
     ShowCustomCursor = true,
     IconSize = UDim2.fromOffset(35, 35),
     Resizable = true,
-    BackgroundImage = "rbxassetid://123887383447725",--这里改你的图片背景
-	BackgroundTransparency = 0.3, 
-	BackgroundColor = Color3.fromRGB(0, 0, 0),
-
     MobileButtonsSide = "Left",
     DisableSearch = false,
     SearchbarSize = UDim2.new(0.8, 0, 1, 0),
