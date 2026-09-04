@@ -130,7 +130,7 @@ local scriptCategories = {
         GroupName = "墨水游戏",
         List = {
             {Name = "AX-有芙同享汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/ax%E8%84%9A%E6%9C%AC%E7%A7%8B%E8%BE%9E%E6%B1%89%E5%8C%96"},
-             {Name = "HSX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/HSX%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F"},   
+            {Name = "HSX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/HSX%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F"},   
             {Name = "墨水Ringta汉化", Url = "https://raw.githubusercontent.com/hdjsjjdgrhj/script-hub/refs/heads/main/Ringta"},
             {Name = "Unm汉化，卡密ink50", Url = "https://raw.githubusercontent.com/Youfutongxiang1/unm-CN/refs/heads/main/README.md"},
         }
@@ -343,9 +343,11 @@ local scriptCategories = {
             {Name = "破坏者谜团脚本", Url = "https://pastebin.com/raw/VRwdkSG3"},
             {Name = "Foxname MM2", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/Foxnamemm2.lua"},
         }
-    }
+    },
 }
-local function CreateScriptButton(group, scriptName, scriptUrl, isLeft)
+
+-- ============= 创建脚本按钮函数 =============
+local function CreateScriptButton(group, scriptName, scriptUrl)
     local btn = group:AddButton({
         Text = scriptName,
         Func = function()
@@ -364,32 +366,71 @@ local function CreateScriptButton(group, scriptName, scriptUrl, isLeft)
     return btn
 end
 
-local function BuildScriptCenter()
-    local leftGroups = {}
-    local rightGroups = {}
-    local totalCategories = #scriptCategories
-    local halfCount = math.ceil(totalCategories / 2)
-    
-    -- 左侧GroupBoxes
-    for i = 1, halfCount do
-        local category = scriptCategories[i]
-        local group = Tabs.ScriptCenter:AddLeftGroupbox(category.GroupName, "folder")
-        leftGroups[#leftGroups + 1] = group
+-- ============= 往一个GroupBox里添加多个分类 =============
+local function AddCategoriesToGroup(group, categories)
+    for idx, category in ipairs(categories) do
+        -- 分类名用 Label 显示
+        group:AddLabel("【" .. category.GroupName .. "】")
+        group:AddDivider()
         
+        -- 每个脚本一个按钮
         for _, script in ipairs(category.List) do
-            CreateScriptButton(group, script.Name, script.Url, true)
-        end
-    end
-    for i = halfCount + 1, totalCategories do
-        local category = scriptCategories[i]
-        local group = Tabs.ScriptCenter:AddRightGroupbox(category.GroupName, "folder")
-        rightGroups[#rightGroups + 1] = group
-        
-        for _, script in ipairs(category.List) do
-            CreateScriptButton(group, script.Name, script.Url, false)
+            CreateScriptButton(group, script.Name, script.Url)
         end
     end
 end
+
+-- ============= 构建脚本中心（4个GroupBox：左2右2） =============
+local function BuildScriptCenter()
+    -- 4个分组框
+    local ScriptCenterLeftGroup = Tabs.ScriptCenter:AddLeftGroupbox("脚本中心1", "code")
+    local ScriptCenterRightGroup = Tabs.ScriptCenter:AddRightGroupbox("脚本中心2", "code")
+    local ScriptCenterLeftGroup1 = Tabs.ScriptCenter:AddLeftGroupbox("脚本中心3", "code")
+    local ScriptCenterRightGroup1 = Tabs.ScriptCenter:AddRightGroupbox("脚本中心4", "code")
+    
+    local totalCategories = #scriptCategories
+    local perGroup = math.ceil(totalCategories / 4)
+    
+    -- 计算每个框放哪些分类
+    local group1Cats = {} -- 左上
+    local group2Cats = {} -- 右上
+    local group3Cats = {} -- 左下
+    local group4Cats = {} -- 右下
+    
+    for i = 1, totalCategories do
+        if i <= perGroup then
+            table.insert(group1Cats, scriptCategories[i])
+        elseif i <= perGroup * 2 then
+            table.insert(group2Cats, scriptCategories[i])
+        elseif i <= perGroup * 3 then
+            table.insert(group3Cats, scriptCategories[i])
+        else
+            table.insert(group4Cats, scriptCategories[i])
+        end
+    end
+    
+    -- 添加到各个GroupBox
+    AddCategoriesToGroup(ScriptCenterLeftGroup, group1Cats)
+    AddCategoriesToGroup(ScriptCenterRightGroup, group2Cats)
+    AddCategoriesToGroup(ScriptCenterLeftGroup1, group3Cats)
+    AddCategoriesToGroup(ScriptCenterRightGroup1, group4Cats)
+    
+    -- 统计信息
+    local totalScripts = 0
+    for _, cat in ipairs(scriptCategories) do
+        totalScripts += #cat.List
+    end
+    
+    Library:Notify("脚本中心加载完成!", 3)
+    local beforeCompCount = 0
+    local beforeCompScripts = 0
+    for i, cat in ipairs(scriptCategories) do
+        if cat.GroupName == "竞争对手" then break end
+        beforeCompCount += 1
+        beforeCompScripts += #cat.List
+    end
+end
+
 BuildScriptCenter()
 
 local YX = Tabs.YXIKB:AddLeftGroupbox("加载服务器")
