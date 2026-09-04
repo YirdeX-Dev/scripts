@@ -931,19 +931,12 @@ Qczmcgn:AddToggle('TeleportToggle', {
         end
     end
 })
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local LocalPlayer = Players.LocalPlayer
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local LocalPlayer = Players.LocalPlayer
-
 -- ============= 变量声明 =============
-local bringGuardsLoop = nil
-local guardHitboxLoop = nil
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
 local guardHitboxActive = false
 
 -- ============= 把人机守卫带来 =============
@@ -952,45 +945,11 @@ Fpgn:AddToggle("BringGuards", {
     Default = false,
     Tooltip = "把所有守卫传送到你面前",
     Callback = function(State)
-        if State then
-            bringGuardsLoop = task.spawn(function()
-                while task.wait(0.5) do
-                    if not Toggles.BringGuards or not Toggles.BringGuards.Value then
-                        break
-                    end
-                    
-                    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if not root then continue end
-                    
-                    local forwardPosition = root.Position + root.CFrame.LookVector * 5
-                    
-                    -- 优先从 Live 文件夹找（更快）
-                    local live = Workspace:FindFirstChild("Live")
-                    local searchTargets = live and {live} or {Workspace}
-                    
-                    for _, target in ipairs(searchTargets) do
-                        for _, obj in ipairs(target:GetDescendants()) do
-                            if obj:IsA("Model") and not Players:GetPlayerFromCharacter(obj) then
-                                if obj:FindFirstChild("TypeOfGuard") then
-                                    local hrp = obj:FindFirstChild("HumanoidRootPart") 
-                                        or obj:FindFirstChild("Torso") 
-                                        or obj.PrimaryPart
-                                    if hrp and hrp:IsA("BasePart") then
-                                        hrp.CFrame = CFrame.new(forwardPosition)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-            Library:Notify("守卫传送已开启", 2)
-        else
-            if bringGuardsLoop then
-                task.cancel(bringGuardsLoop)
-                bringGuardsLoop = nil
-            end
+        if not State then
+            -- 关闭时不做特殊处理（守卫留在原地）
             Library:Notify("守卫传送已关闭", 2)
+        else
+            Library:Notify("守卫传送已开启", 2)
         end
     end
 })
@@ -1003,34 +962,16 @@ Fpgn:AddToggle('GuardHitboxToggle', {
     Callback = function(State)
         guardHitboxActive = State
         
-        pcall(function()
-            local live = Workspace:FindFirstChild("Live")
-            if not live then return end
-            
-            for _, model in pairs(live:GetChildren()) do
-                if model:IsA("Model") then
-                    local head = model:FindFirstChild("Head")
-                    if head and head:IsA("BasePart") then
-                        if State then
-                            -- 保存原始属性
-                            if not head:GetAttribute("OG_Transparency") then
-                                head:SetAttribute("OG_Transparency", head.Transparency)
-                                head:SetAttribute("OG_SizeX", head.Size.X)
-                                head:SetAttribute("OG_SizeY", head.Size.Y)
-                                head:SetAttribute("OG_SizeZ", head.Size.Z)
-                            end
-                            
-                            local size = Options.GuardHitboxSizeSlider and Options.GuardHitboxSizeSlider.Value or 4
-                            local trans = Options.GuardHitboxTransparencySlider and Options.GuardHitboxTransparencySlider.Value or 0
-                            
-                            head.Size = Vector3.new(size, size, size)
-                            head.CanCollide = false
-                            head.CanQuery = false
-                            head.CanTouch = false
-                            head.Massless = true
-                            head.Transparency = trans
-                        else
-                            -- 恢复原始属性
+        if not State then
+            -- 关闭时恢复所有守卫碰撞箱
+            pcall(function()
+                local live = Workspace:FindFirstChild("Live")
+                if not live then return end
+                
+                for _, model in pairs(live:GetChildren()) do
+                    if model:IsA("Model") then
+                        local head = model:FindFirstChild("Head")
+                        if head and head:IsA("BasePart") then
                             local ogX = head:GetAttribute("OG_SizeX") or 2
                             local ogY = head:GetAttribute("OG_SizeY") or 1
                             local ogZ = head:GetAttribute("OG_SizeZ") or 1
@@ -1041,12 +982,14 @@ Fpgn:AddToggle('GuardHitboxToggle', {
                             head.CanQuery = true
                             head.CanTouch = true
                             head.Massless = false
-                            head.Transparency = ogTrans ~= nil and ogTrans or 0
+                            if ogTrans ~= nil then
+                                head.Transparency = ogTrans
+                            end
                         end
                     end
                 end
-            end
-        end)
+            end)
+        end
         
         Library:Notify(State and "碰撞箱扩展已开启" or "碰撞箱扩展已关闭", 2)
     end
@@ -1105,10 +1048,46 @@ FpgnDep:AddSlider('GuardHitboxTransparencySlider', {
     end
 })
 
--- ============= 动态监控（持续维持碰撞箱状态） =============
-guardHitboxLoop = task.spawn(function()
+FpgnDep:SetupDependencies({
+    { Toggles.GuardHitboxToggle, true },
+})
+
+-- ============= 守卫传送循环 =============
+task.spawn(function()
+    while task.wait(0.5) do
+        if not Toggles.BringGuards or not Toggles.BringGuards.Value then continue end
+        
+        pcall(function()
+            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+            
+            local forwardPosition = root.Position + root.CFrame.LookVector * 5
+            local live = Workspace:FindFirstChild("Live")
+            local searchTargets = live and {live} or {Workspace}
+            
+            for _, target in ipairs(searchTargets) do
+                for _, obj in ipairs(target:GetDescendants()) do
+                    if obj:IsA("Model") and not Players:GetPlayerFromCharacter(obj) then
+                        if obj:FindFirstChild("TypeOfGuard") then
+                            local hrp = obj:FindFirstChild("HumanoidRootPart") 
+                                or obj:FindFirstChild("Torso") 
+                                or obj.PrimaryPart
+                            if hrp and hrp:IsA("BasePart") then
+                                hrp.CFrame = CFrame.new(forwardPosition)
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- ============= 碰撞箱动态监控循环 =============
+task.spawn(function()
     while task.wait(0.5) do
         if not guardHitboxActive then continue end
+        if not Toggles.GuardHitboxToggle or not Toggles.GuardHitboxToggle.Value then continue end
         
         pcall(function()
             local live = Workspace:FindFirstChild("Live")
@@ -1121,11 +1100,20 @@ guardHitboxLoop = task.spawn(function()
                 if model:IsA("Model") then
                     local head = model:FindFirstChild("Head")
                     if head and head:IsA("BasePart") then
+                        -- 首次开启时保存原始属性
+                        if not head:GetAttribute("OG_Transparency") then
+                            head:SetAttribute("OG_Transparency", head.Transparency)
+                            head:SetAttribute("OG_SizeX", head.Size.X)
+                            head:SetAttribute("OG_SizeY", head.Size.Y)
+                            head:SetAttribute("OG_SizeZ", head.Size.Z)
+                        end
+                        
                         if head.Size.X ~= targetSize then
                             head.Size = Vector3.new(targetSize, targetSize, targetSize)
                             head.CanCollide = false
                             head.CanQuery = false
                             head.CanTouch = false
+                            head.Massless = true
                         end
                         if head.Transparency ~= targetTrans then
                             head.Transparency = targetTrans
@@ -1137,6 +1125,35 @@ guardHitboxLoop = task.spawn(function()
     end
 end)
 
+-- ============= 卸载时清理 =============
+Library:OnUnload(function()
+    -- 恢复所有守卫的碰撞箱
+    pcall(function()
+        local live = Workspace:FindFirstChild("Live")
+        if not live then return end
+        
+        for _, model in pairs(live:GetChildren()) do
+            if model:IsA("Model") then
+                local head = model:FindFirstChild("Head")
+                if head and head:IsA("BasePart") then
+                    local ogX = head:GetAttribute("OG_SizeX") or 2
+                    local ogY = head:GetAttribute("OG_SizeY") or 1
+                    local ogZ = head:GetAttribute("OG_SizeZ") or 1
+                    local ogTrans = head:GetAttribute("OG_Transparency")
+                    
+                    head.Size = Vector3.new(ogX, ogY, ogZ)
+                    head.CanCollide = true
+                    head.CanQuery = true
+                    head.CanTouch = true
+                    head.Massless = false
+                    if ogTrans ~= nil then
+                        head.Transparency = ogTrans
+                    end
+                end
+            end
+        end
+    end)
+end)
 --旋转木马
 local Wjgjgn = Tabs.battle:AddLeftGroupbox("攻击", "users")
 local Cxwjgn = Tabs.battle:AddLeftGroupbox("朝向", "users")
@@ -1857,44 +1874,54 @@ meun:AddToggle("WalkSpeedIncrease", {
     Text = "修改移速",
     Default = false,
     Callback = function(State)
-        SaveFunctionState("WalkSpeedIncrease", State)
-        if not State then return end
-        local Hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if Hum then
-            Hum.WalkSpeed = Library.Options.WalkSpeedAmount.Value or 16
-        end
-        WalkSpeedConnection = LocalPlayer.CharacterAdded:Connect(function(Char)
-            local NewHum = Char:WaitForChild("Humanoid")
-            if NewHum and Library.Toggles.WalkSpeedIncrease.Value then
-                NewHum.WalkSpeed = Library.Options.WalkSpeedAmount.Value or 16
-            end
-        end)
-        task.spawn(function()
-            while Library.Toggles.WalkSpeedIncrease.Value do
-                local Hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if not State then
+            pcall(function()
+                local Hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
                 if Hum then
-                    Hum.WalkSpeed = Library.Options.WalkSpeedAmount.Value or 16
+                    Hum.WalkSpeed = 16
                 end
-                task.wait(0.4)
-            end
-        end)
+            end)
+        end
     end
 })
 
 local meun1 = meun:AddDependencyBox()
+
 meun1:AddSlider("WalkSpeedAmount", {
+    Text = "行走速度值",
     Min = 1,
     Default = 16,
     Max = 100,
-    Text = "行走速度值",
+    Rounding = 0,
+    Suffix = "",
     Callback = function(Value)
-        local Hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if Hum then
-            Hum.WalkSpeed = Value
+        if Toggles.WalkSpeedIncrease and Toggles.WalkSpeedIncrease.Value then
+            pcall(function()
+                local Hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if Hum then
+                    Hum.WalkSpeed = Value
+                end
+            end)
         end
     end
 })
 
+meun1:SetupDependencies({
+    { Toggles.WalkSpeedIncrease, true },
+})
+
+task.spawn(function()
+    while task.wait(0.4) do
+        if Toggles.WalkSpeedIncrease and Toggles.WalkSpeedIncrease.Value then
+            pcall(function()
+                local Hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if Hum then
+                    Hum.WalkSpeed = Options.WalkSpeedAmount.Value
+                end
+            end)
+        end
+    end
+end)
 
 meun:AddDropdown('QTEMode', {
     Text = 'QTE模式',
