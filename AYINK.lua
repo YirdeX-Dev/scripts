@@ -932,6 +932,35 @@ Qczmcgn:AddToggle('TeleportToggle', {
     end
 })
 --反叛
+Fpgn:AddToggle("BringGuards", {
+    Text = "把人机守卫带来",
+    Default = false,
+    Callback = function(State)
+        SaveFunctionState("BringGuards", State)
+        if not State then return end
+        task.spawn(function()
+            while Library.Toggles.BringGuards.Value do
+                local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local forwardPosition = root.Position + root.CFrame.LookVector * 5
+                    for _, obj in ipairs(Workspace:GetDescendants()) do
+                        if obj:IsA("Model") and not Players:GetPlayerFromCharacter(obj) then
+                            local typeGuard = obj:FindFirstChild("TypeOfGuard")
+                            if typeGuard then
+                                local hrp = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Torso") or obj.PrimaryPart
+                                if hrp and hrp:IsA("BasePart") then
+                                    hrp.CFrame = CFrame.new(forwardPosition)
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+})
+
 Fpgn:AddToggle('GuardHitboxToggle', {
     Text = '启用碰撞箱扩展',
     Default = false,
@@ -973,7 +1002,9 @@ Fpgn:AddToggle('GuardHitboxToggle', {
     end
 })
 
-Fpgn:AddSlider('GuardHitboxSizeSlider', {
+local Fpgn1 = Fpgn:AddDependencyBox()
+
+Fpgn1:AddSlider('GuardHitboxSizeSlider', {
     Text = '碰撞箱大小',
     Default = 4,
     Min = 1,
@@ -999,7 +1030,7 @@ Fpgn:AddSlider('GuardHitboxSizeSlider', {
     end
 })
 
-Fpgn:AddSlider('GuardHitboxTransparencySlider', {
+Fpgn1:AddSlider('GuardHitboxTransparencySlider', {
     Text = '碰撞箱透明度',
     Default = 0,
     Min = 0,
@@ -1063,6 +1094,7 @@ local meun = Tabs.Wanjia:AddLeftGroupbox("杂项", "database")
 local Owner = Tabs.Wanjia:AddRightGroupbox("通行证", "ticket")
 local Csgn = Tabs.battle:AddRightGroupbox("传送", "ticket")
 local ControlGroup = Tabs.battle:AddLeftGroupbox("旋转", "ticket")
+local Wptj = Tabs.Wanjia:AddLeftGroupbox("自定义头衔", "database")
 
 local ESP = {
     Unloaded = false,
@@ -1768,6 +1800,49 @@ function ESP.Unload()
 end
 
 getgenv().AFHub_InkGame_Unload = ESP.Unload
+
+local meun:AddToggle("WalkSpeedIncrease", {
+    Text = "修改移速",
+    Default = false,
+    Callback = function(State)
+        SaveFunctionState("WalkSpeedIncrease", State)
+        if not State then return end
+        local Hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if Hum then
+            Hum.WalkSpeed = Library.Options.WalkSpeedAmount.Value or 16
+        end
+        WalkSpeedConnection = LocalPlayer.CharacterAdded:Connect(function(Char)
+            local NewHum = Char:WaitForChild("Humanoid")
+            if NewHum and Library.Toggles.WalkSpeedIncrease.Value then
+                NewHum.WalkSpeed = Library.Options.WalkSpeedAmount.Value or 16
+            end
+        end)
+        task.spawn(function()
+            while Library.Toggles.WalkSpeedIncrease.Value do
+                local Hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if Hum then
+                    Hum.WalkSpeed = Library.Options.WalkSpeedAmount.Value or 16
+                end
+                task.wait(0.4)
+            end
+        end)
+    end
+})
+
+local meun1 = meun:AddDependencyBox()
+meun1:AddSlider("WalkSpeedAmount", {
+    Min = 1,
+    Default = 16,
+    Max = 100,
+    Text = "行走速度值",
+    Callback = function(Value)
+        local Hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if Hum then
+            Hum.WalkSpeed = Value
+        end
+    end
+})
+
 
 meun:AddDropdown('QTEMode', {
     Text = 'QTE模式',
@@ -2537,30 +2612,214 @@ Boots:AddInput("WonInput", {
     end
 })
 
-Boots:AddInput('WalkSpeedInput', {
-    Default = '16',
-    Numeric = true,
+Wptj:AddInput('CustomTitleInput', {
+    Default = 'AY Hub',
+    Numeric = false,
     Finished = true,
-    Text = '移动速度',
-    Placeholder = '输入速度',
-    Callback = function(value)
-        local speed = tonumber(value)
-        if not speed or speed <= 0 then return end
-        pcall(function()
-            local Players = game:GetService("Players")
-            local lplr = Players.LocalPlayer
-            local function setSpeed()
-                local char = lplr.Character
-                if not char then return end
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum.WalkSpeed = speed
+    Text = '自定义头衔文本',
+    Placeholder = '输入你想要显示的头衔...',
+    Callback = function(Value)
+        local currentTitle = Value or 'AY Hub'
+        local titleConnections = {}
+        local eventConnections = {}        
+        local function applyTitleEffect(character, customTitle)
+            if not character then 
+                Library:Notify("角色不存在！", 3)
+                return false
+            end                
+            local lplr = game:GetService("Players").LocalPlayer
+            if not lplr then
+                Library:Notify("玩家不存在！", 3)
+                return false
+            end            
+            local torso = character:FindFirstChild("Torso") or character:FindFirstChild("HumanoidRootPart")
+            if not torso then
+                Library:Notify("找不到角色身体部件！", 3)
+                return false
+            end                
+            local nametag = torso:FindFirstChild("Player_Nametag")
+            if not nametag then
+                Library:Notify("找不到名字标签！", 3)
+                return false
+            end                
+            local levelText = nametag:FindFirstChild("LevelText")
+            local displayName = nametag:FindFirstChild("DisplayName")
+            if not levelText or not displayName then
+                Library:Notify("找不到标签文本部件！", 3)
+                return false
+            end               
+            local isOwner = (lplr.Name == "Yolmar_43")
+            local titleText = customTitle or "AY Hub"            
+            if isOwner then
+                levelText.Text = "[ AY Hub - 所有者 ] " .. titleText
+            else
+                levelText.Text = "[ AY Hub - 成员 ] " .. titleText
+            end                
+            if titleConnections[character] then
+                pcall(function() titleConnections[character]:Disconnect() end)
+                titleConnections[character] = nil
+            end            
+            local wave = 0
+            local rainbowHue = 0
+            local runService = game:GetService("RunService")                
+            local connection = runService.RenderStepped:Connect(function(deltaTime)
+                if not character or not character.Parent then
+                    connection:Disconnect()
+                    titleConnections[character] = nil
+                    return
+                end                        
+                wave = (wave + deltaTime * 2) % (2 * math.pi)
+                rainbowHue = (rainbowHue + deltaTime * 0.2) % 1       
+                if isOwner then
+                    local brightness = (math.sin(wave) + 1) / 2
+                    levelText.TextColor3 = Color3.new(1, brightness, brightness)
+                else
+                    local brightness = (math.sin(wave) + 1) / 2
+                    levelText.TextColor3 = Color3.new(brightness, 1, brightness)
+                end        
+
+                displayName.TextColor3 = Color3.fromHSV(rainbowHue, 1, 1)
+            end)                
+            titleConnections[character] = connection
+            print('[AY Hub] 头衔已应用:', levelText.Text)
+            return true
+        end        
+        local function resetPlayerTitle(character)
+            if not character then
+                local lplr = game:GetService("Players").LocalPlayer
+                if lplr and lplr.Character then
+                    character = lplr.Character
+                else
+                    Library:Notify("找不到角色！", 3)
+                    return false
                 end
+            end            
+            if titleConnections[character] then
+                pcall(function() titleConnections[character]:Disconnect() end)
+                titleConnections[character] = nil
+            end            
+            local torso = character:FindFirstChild("Torso") or character:FindFirstChild("HumanoidRootPart")
+            if torso then
+                local nametag = torso:FindFirstChild("Player_Nametag")
+                if nametag then
+                    local levelText = nametag:FindFirstChild("LevelText")
+                    local displayName = nametag:FindFirstChild("DisplayName")           
+                    
+                    if levelText then
+                        levelText.Text = ""
+                        levelText.TextColor3 = Color3.new(1, 1, 1)
+                    end
+                    if displayName then
+                        displayName.Text = game:GetService("Players").LocalPlayer.Name
+                        displayName.TextColor3 = Color3.new(1, 1, 1)
+                    end
+                end
+            end            
+            print('[AY Hub] 头衔已重置')
+            return true
+        end        
+        local function setupCharacterListener()
+            local lplr = game:GetService("Players").LocalPlayer            
+            if eventConnections.characterAdded then
+                pcall(function() eventConnections.characterAdded:Disconnect() end)
+                eventConnections.characterAdded = nil
+            end           
+            eventConnections.characterAdded = lplr.CharacterAdded:Connect(function(character)
+                task.wait(0.5)
+                if currentTitle then
+                    local success = applyTitleEffect(character, currentTitle)
+                    if success then
+                        Library:Notify("角色重生，头衔已恢复！", 3)
+                    end
+                end
+            end)
+        end     
+        local lplr = game:GetService("Players").LocalPlayer
+        if lplr and lplr.Character then
+            local success = applyTitleEffect(lplr.Character, currentTitle)
+            if success then
+                Library:Notify("头衔已更新为: " .. currentTitle, 3)
+                print('[AY Hub] 头衔更新成功:', currentTitle)
+            else
+                Library:Notify("头衔更新失败，请重试！", 3)
             end
-            setSpeed()
-            lplr.CharacterAdded:Connect(setSpeed)
-        end)
+        else
+            Library:Notify("等待角色加载后应用头衔", 3)
+        end        
+        setupCharacterListener()        
+        Wptj:SetData('currentTitle', currentTitle)
+        Wptj:SetData('titleConnections', titleConnections)
+        Wptj:SetData('eventConnections', eventConnections)
+        Wptj:SetData('applyTitleEffect', applyTitleEffect)
+        Wptj:SetData('resetPlayerTitle', resetPlayerTitle)
     end
+})
+Wptj:AddButton({
+    Text = '开启头衔特效',
+    Func = function()
+        local currentTitle = Wptj:GetData('currentTitle') or 'AY Hub 最强'
+        local applyTitleEffect = Wptj:GetData('applyTitleEffect')
+        local titleConnections = Wptj:GetData('titleConnections') or {}        
+        if not applyTitleEffect then
+            Library:Notify("请先在输入框中设置头衔！", 3)
+            return
+        end      
+        local lplr = game:GetService("Players").LocalPlayer
+        if not lplr then
+            Library:Notify("玩家不存在！", 3)
+            return
+        end        
+        if not lplr.Character then
+            Library:Notify("请等待角色加载完成！", 3)
+            return
+        end        
+        local success = applyTitleEffect(lplr.Character, currentTitle)
+        if success then
+            Library:Notify("头衔特效已开启！", 3)
+            print('[AY Hub] 头衔特效已开启')
+        else
+            Library:Notify("头衔特效开启失败！", 3)
+        end
+    end,
+    DoubleClick = false
+})
+Wptj:AddButton({
+    Text = '重置头衔',
+    Func = function()
+        local resetPlayerTitle = Wptj:GetData('resetPlayerTitle')
+        local titleConnections = Wptj:GetData('titleConnections') or {}
+        local eventConnections = Wptj:GetData('eventConnections') or {}
+        
+        if not resetPlayerTitle then
+            Library:Notify("请先在输入框中设置头衔！", 3)
+            return
+        end        
+        local lplr = game:GetService("Players").LocalPlayer
+        if not lplr then
+            Library:Notify("玩家不存在！", 3)
+            return
+        end       
+        if not lplr.Character then
+            Library:Notify("角色不存在！", 3)
+            return
+        end        
+        local success = resetPlayerTitle(lplr.Character)
+        if success then
+            for _, conn in pairs(titleConnections) do
+                pcall(function() conn:Disconnect() end)
+            end
+            if eventConnections.characterAdded then
+                pcall(function() eventConnections.characterAdded:Disconnect() end)
+            end            
+            Wptj:SetData('titleConnections', {})
+            Wptj:SetData('eventConnections', {})            
+            Library:Notify("头衔已重置为默认状态！", 3)
+            print('[AY Hub] 头衔已重置')
+        else
+            Library:Notify("头衔重置失败！", 3)
+        end
+    end,
+    DoubleClick = false
 })
 
 --攻击功能
@@ -2857,8 +3116,6 @@ Cxwjgn:AddToggle('FacePlayerToggle', {
 
 updateTarget()
 
-updateTarget()
-
 local Players1 = Tabs.Players:AddLeftGroupbox("玩家信息", "info")
 local Players2 = Tabs.Players:AddRightGroupbox("玩家", "user")
 
@@ -2990,35 +3247,6 @@ Players2:AddButton({
     end
 })
 
-local Zdxg = Tabs.guard:AddLeftGroupbox("枪械修改", "crosshair")
-Zdxg:AddInput('BulletInput', {
-    Default = '999',
-    Numeric = true,
-    Finished = true,
-    Text = '子弹数量',
-    Placeholder = '输入子弹数量',
-    Callback = function(Value)
-        _G.BulletAmount = tonumber(Value) or 999
-    end
-})
-
-Zdxg:AddButton('修改子弹', function()
-    local Player = game:GetService("Players").LocalPlayer
-    local Backpack = Player:FindFirstChild("Backpack")
-    if not Backpack then return end
-    local Amount = _G.BulletAmount or 999
-    
-    for _, Gun in pairs(Backpack:GetChildren()) do
-        if Gun:IsA("Tool") and Gun:FindFirstChild("InfoClient") then
-            local Bullets = Gun.InfoClient:FindFirstChild("Bullets")
-            if Bullets then
-                Bullets.Value = Amount
-                print('[成功] ' .. Gun.Name .. ' 子弹已改为 ' .. Amount)
-            end
-        end
-    end
-end)
-
 local MenuGroup = Tabs.Settings:AddLeftGroupbox("菜单")
 MenuGroup:AddToggle("KeybindMenuOpen", {
     Text = "显示按键绑定菜单",
@@ -3072,4 +3300,4 @@ ThemeManager:SetFolder("MyScriptTheme")
 SaveManager:SetFolder("MyScriptConfig")
 SaveManager:BuildConfigSection(Tabs.Settings)
 ThemeManager:ApplyToTab(Tabs.Settings)
-Library:Notify("AY Hub丨墨水游戏 已加载", 3)
+Library:Notify("AY Hub丨墨水游戏 已加载", 5)
