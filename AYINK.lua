@@ -1801,7 +1801,7 @@ end
 
 getgenv().AFHub_InkGame_Unload = ESP.Unload
 
-local meun:AddToggle("WalkSpeedIncrease", {
+meun:AddToggle("WalkSpeedIncrease", {
     Text = "修改移速",
     Default = false,
     Callback = function(State)
