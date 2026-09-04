@@ -931,43 +931,80 @@ Qczmcgn:AddToggle('TeleportToggle', {
         end
     end
 })
---反叛
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+-- ============= 变量声明 =============
+local bringGuardsLoop = nil
+local guardHitboxLoop = nil
+local guardHitboxActive = false
+
+-- ============= 把人机守卫带来 =============
 Fpgn:AddToggle("BringGuards", {
     Text = "把人机守卫带来",
     Default = false,
+    Tooltip = "把所有守卫传送到你面前",
     Callback = function(State)
-        SaveFunctionState("BringGuards", State)
-        if not State then return end
-        task.spawn(function()
-            while Library.Toggles.BringGuards.Value do
-                local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if root then
+        if State then
+            bringGuardsLoop = task.spawn(function()
+                while task.wait(0.5) do
+                    if not Toggles.BringGuards or not Toggles.BringGuards.Value then
+                        break
+                    end
+                    
+                    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if not root then continue end
+                    
                     local forwardPosition = root.Position + root.CFrame.LookVector * 5
-                    for _, obj in ipairs(Workspace:GetDescendants()) do
-                        if obj:IsA("Model") and not Players:GetPlayerFromCharacter(obj) then
-                            local typeGuard = obj:FindFirstChild("TypeOfGuard")
-                            if typeGuard then
-                                local hrp = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Torso") or obj.PrimaryPart
-                                if hrp and hrp:IsA("BasePart") then
-                                    hrp.CFrame = CFrame.new(forwardPosition)
+                    
+                    -- 优先从 Live 文件夹找（更快）
+                    local live = Workspace:FindFirstChild("Live")
+                    local searchTargets = live and {live} or {Workspace}
+                    
+                    for _, target in ipairs(searchTargets) do
+                        for _, obj in ipairs(target:GetDescendants()) do
+                            if obj:IsA("Model") and not Players:GetPlayerFromCharacter(obj) then
+                                if obj:FindFirstChild("TypeOfGuard") then
+                                    local hrp = obj:FindFirstChild("HumanoidRootPart") 
+                                        or obj:FindFirstChild("Torso") 
+                                        or obj.PrimaryPart
+                                    if hrp and hrp:IsA("BasePart") then
+                                        hrp.CFrame = CFrame.new(forwardPosition)
+                                    end
                                 end
                             end
                         end
                     end
                 end
-                task.wait(0.5)
+            end)
+            Library:Notify("守卫传送已开启", 2)
+        else
+            if bringGuardsLoop then
+                task.cancel(bringGuardsLoop)
+                bringGuardsLoop = nil
             end
-        end)
+            Library:Notify("守卫传送已关闭", 2)
+        end
     end
 })
 
+-- ============= 碰撞箱扩展 =============
 Fpgn:AddToggle('GuardHitboxToggle', {
     Text = '启用碰撞箱扩展',
     Default = false,
-    Tooltip = '开启后扩大碰撞箱',
+    Tooltip = '扩大守卫头部碰撞箱，更容易命中',
     Callback = function(State)
+        guardHitboxActive = State
+        
         pcall(function()
-            local live = workspace:FindFirstChild("Live")
+            local live = Workspace:FindFirstChild("Live")
             if not live then return end
             
             for _, model in pairs(live:GetChildren()) do
@@ -975,46 +1012,60 @@ Fpgn:AddToggle('GuardHitboxToggle', {
                     local head = model:FindFirstChild("Head")
                     if head and head:IsA("BasePart") then
                         if State then
-                            -- 保存原始透明度
-                            if not head:GetAttribute("OriginalTransparency") then
-                                head:SetAttribute("OriginalTransparency", head.Transparency)
+                            -- 保存原始属性
+                            if not head:GetAttribute("OG_Transparency") then
+                                head:SetAttribute("OG_Transparency", head.Transparency)
+                                head:SetAttribute("OG_SizeX", head.Size.X)
+                                head:SetAttribute("OG_SizeY", head.Size.Y)
+                                head:SetAttribute("OG_SizeZ", head.Size.Z)
                             end
-                            head.Size = Vector3.new(Options.GuardHitboxSizeSlider.Value, Options.GuardHitboxSizeSlider.Value, Options.GuardHitboxSizeSlider.Value)
+                            
+                            local size = Options.GuardHitboxSizeSlider and Options.GuardHitboxSizeSlider.Value or 4
+                            local trans = Options.GuardHitboxTransparencySlider and Options.GuardHitboxTransparencySlider.Value or 0
+                            
+                            head.Size = Vector3.new(size, size, size)
                             head.CanCollide = false
                             head.CanQuery = false
                             head.CanTouch = false
                             head.Massless = true
-                            head.Transparency = Options.GuardHitboxTransparencySlider.Value
+                            head.Transparency = trans
                         else
-                            head.Size = Vector3.new(2, 1, 1)
+                            -- 恢复原始属性
+                            local ogX = head:GetAttribute("OG_SizeX") or 2
+                            local ogY = head:GetAttribute("OG_SizeY") or 1
+                            local ogZ = head:GetAttribute("OG_SizeZ") or 1
+                            local ogTrans = head:GetAttribute("OG_Transparency")
+                            
+                            head.Size = Vector3.new(ogX, ogY, ogZ)
                             head.CanCollide = true
                             head.CanQuery = true
                             head.CanTouch = true
                             head.Massless = false
-                            -- 恢复原始透明度
-                            local origTrans = head:GetAttribute("OriginalTransparency")
-                            head.Transparency = origTrans ~= nil and origTrans or 0
+                            head.Transparency = ogTrans ~= nil and ogTrans or 0
                         end
                     end
                 end
             end
         end)
+        
+        Library:Notify(State and "碰撞箱扩展已开启" or "碰撞箱扩展已关闭", 2)
     end
 })
 
-local Fpgn1 = Fpgn:AddDependencyBox()
+-- ============= 依赖框（两个滑块） =============
+local FpgnDep = Fpgn:AddDependencyBox()
 
-Fpgn1:AddSlider('GuardHitboxSizeSlider', {
+FpgnDep:AddSlider('GuardHitboxSizeSlider', {
     Text = '碰撞箱大小',
     Default = 4,
     Min = 1,
-    Max = 10,
+    Max = 15,
     Rounding = 0,
-    Tooltip = '调整守卫头部碰撞箱大小',
+    Tooltip = '守卫头部碰撞箱大小',
     Callback = function(Value)
-        if not Toggles.GuardHitboxToggle.Value then return end
+        if not guardHitboxActive then return end
         pcall(function()
-            local live = workspace:FindFirstChild("Live")
+            local live = Workspace:FindFirstChild("Live")
             if not live then return end
             
             for _, model in pairs(live:GetChildren()) do
@@ -1022,7 +1073,6 @@ Fpgn1:AddSlider('GuardHitboxSizeSlider', {
                     local head = model:FindFirstChild("Head")
                     if head and head:IsA("BasePart") then
                         head.Size = Vector3.new(Value, Value, Value)
-                        head.CanCollide = false
                     end
                 end
             end
@@ -1030,26 +1080,24 @@ Fpgn1:AddSlider('GuardHitboxSizeSlider', {
     end
 })
 
-Fpgn1:AddSlider('GuardHitboxTransparencySlider', {
+FpgnDep:AddSlider('GuardHitboxTransparencySlider', {
     Text = '碰撞箱透明度',
     Default = 0,
     Min = 0,
     Max = 1,
     Rounding = 2,
-    Tooltip = '调整碰撞箱可见度（渐隐渐现）',
+    Tooltip = '0=完全可见，1=完全透明',
     Callback = function(Value)
-        if not Toggles.GuardHitboxToggle.Value then return end
+        if not guardHitboxActive then return end
         pcall(function()
-            local live = workspace:FindFirstChild("Live")
+            local live = Workspace:FindFirstChild("Live")
             if not live then return end
             
             for _, model in pairs(live:GetChildren()) do
                 if model:IsA("Model") then
                     local head = model:FindFirstChild("Head")
                     if head and head:IsA("BasePart") then
-                        TweenService:Create(head, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                            Transparency = Value
-                        }):Play()
+                        head.Transparency = Value
                     end
                 end
             end
@@ -1057,34 +1105,38 @@ Fpgn1:AddSlider('GuardHitboxTransparencySlider', {
     end
 })
 
--- 动态监控
-task.spawn(function()
-    while true do
-        task.wait(0.5)
-        if Toggles.GuardHitboxToggle and Toggles.GuardHitboxToggle.Value then
-            pcall(function()
-                local live = workspace:FindFirstChild("Live")
-                if not live then return end
-                
-                for _, model in pairs(live:GetChildren()) do
-                    if model:IsA("Model") then
-                        local head = model:FindFirstChild("Head")
-                        if head and head:IsA("BasePart") then
-                            local targetSize = Vector3.new(Options.GuardHitboxSizeSlider.Value, Options.GuardHitboxSizeSlider.Value, Options.GuardHitboxSizeSlider.Value)
-                            if head.Size ~= targetSize then
-                                head.Size = targetSize
-                                head.CanCollide = false
-                            end
-                            if head.Transparency ~= Options.GuardHitboxTransparencySlider.Value then
-                                head.Transparency = Options.GuardHitboxTransparencySlider.Value
-                            end
+-- ============= 动态监控（持续维持碰撞箱状态） =============
+guardHitboxLoop = task.spawn(function()
+    while task.wait(0.5) do
+        if not guardHitboxActive then continue end
+        
+        pcall(function()
+            local live = Workspace:FindFirstChild("Live")
+            if not live then return end
+            
+            local targetSize = Options.GuardHitboxSizeSlider and Options.GuardHitboxSizeSlider.Value or 4
+            local targetTrans = Options.GuardHitboxTransparencySlider and Options.GuardHitboxTransparencySlider.Value or 0
+            
+            for _, model in pairs(live:GetChildren()) do
+                if model:IsA("Model") then
+                    local head = model:FindFirstChild("Head")
+                    if head and head:IsA("BasePart") then
+                        if head.Size.X ~= targetSize then
+                            head.Size = Vector3.new(targetSize, targetSize, targetSize)
+                            head.CanCollide = false
+                            head.CanQuery = false
+                            head.CanTouch = false
+                        end
+                        if head.Transparency ~= targetTrans then
+                            head.Transparency = targetTrans
                         end
                     end
                 end
-            end)
-        end
+            end
+        end)
     end
 end)
+
 --旋转木马
 local Wjgjgn = Tabs.battle:AddLeftGroupbox("攻击", "users")
 local Cxwjgn = Tabs.battle:AddLeftGroupbox("朝向", "users")
