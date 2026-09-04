@@ -74,7 +74,6 @@ if Remotes then
     temporaryReached = Remotes:FindFirstChild("TemporaryReachedBindable")
 end
 
--- ==================== Maid ====================
 local Maid = {}
 Maid.__index = Maid
 
@@ -107,7 +106,6 @@ end
 local tugMaid = Maid.new()
 local mode = "合法"
 
--- ==================== 发送拉绳请求 ====================
 local function sendPullRequest()
     pcall(function()
         if temporaryReached then
@@ -126,7 +124,6 @@ local function sendPullRequest()
     end)
 end
 
--- ==================== 自动拔河开关 ====================
 Tug_Of_War:AddToggle("AutoTug", {
     Text = "自动拔河",
     Default = false,
@@ -137,10 +134,8 @@ Tug_Of_War:AddToggle("AutoTug", {
             tugMaid:GiveTask(task.spawn(function()
                 while Toggles.AutoTug and Toggles.AutoTug.Value do
                     if mode == "暴力" then
-                        -- 暴力模式：1秒20次 = 每0.05秒一次
                         task.wait(0.05)
                     else
-                        -- 合法模式：1秒5次 = 每0.2秒一次
                         task.wait(0.2)
                     end
                     sendPullRequest()
@@ -152,7 +147,6 @@ Tug_Of_War:AddToggle("AutoTug", {
     end
 })
 
--- ==================== 模式选择 ====================
 Tug_Of_War:AddDropdown("ModeDropdown", {
     Text = "操作模式",
     Values = {"合法", "暴力"},
@@ -166,7 +160,6 @@ Tug_Of_War:AddDropdown("ModeDropdown", {
     end
 })
 
--- ==================== 卸载清理 ====================
 Library:OnUnload(function()
     tugMaid:DoCleaning()
 end)
@@ -280,18 +273,14 @@ Afmsktb:AddToggle("DalgonaGodMode", {
                 local SharedFunctions = require(ReplicatedStorage.Modules.SharedFunctions)
                 local oldPlaySound = SharedFunctions.PlaySound
 
-                -- Hook PlaySound 阻止裂纹声音和效果触发
                 SharedFunctions.PlaySound = newcclosure(function(...)
                     local args = {...}
                     local soundId = args[1]
-                    -- 阻止裂纹相关的声音播放
                     if soundId and (tostring(soundId):find("crack") or tostring(soundId):find("break")) then
                         return nil
                     end
                     return oldPlaySound(...)
                 end)
-
-                -- 同时Hook原始函数引用
                 hookfunction(oldPlaySound, newcclosure(function(...)
                     local args = {...}
                     local soundId = args[1]
@@ -332,7 +321,6 @@ Afmsktb:AddButton({
             return
         end
 
-        -- 方法1: 通过远程事件直接完成
         local success = pcall(function()
             local remotes = ReplicatedStorage:WaitForChild("Remotes")
             if remotes:FindFirstChild("Dalgona") then
@@ -340,7 +328,6 @@ Afmsktb:AddButton({
             end
         end)
 
-        -- 方法2: 修改本地完成状态
         pcall(function()
             local playerGui = LocalPlayer:WaitForChild("PlayerGui")
             local dalgonaGui = playerGui:FindFirstChild("DalgonaGUI") or playerGui:FindFirstChild("Dalgona")
@@ -357,7 +344,6 @@ Afmsktb:AddButton({
             end
         end)
 
-        -- 方法3: 直接修改游戏状态值
         pcall(function()
             local values = workspace:WaitForChild("Values")
             if values:FindFirstChild("DalgonaCompleted") then
@@ -603,8 +589,8 @@ function spawnPlatforms()
         Effects.rope:Destroy()
     end
     
-    local startPos = Vector3.new(15.6, 520.6, -1536.0)
-    local endPos = Vector3.new(-182.8, 520.4, -1529.4)
+    local startPos = Vector3.new(15.6, 515.6, -1536.0)
+    local endPos = Vector3.new(-182.8, 515.4, -1529.4)
     local platformCount = 15
     local platformSize = Vector3.new(35, 1, 35)
     local transparency = 0.9
@@ -687,7 +673,7 @@ Qczmcgn:AddToggle("TeleportUpToggle", {
 local PlatformObject = nil
 
 Qczmcgn:AddToggle('SpikeProtectionToggle', {
-    Text = '删除尖刺伤害',
+    Text = '规避尖刺伤害',
     Default = false,
     Tooltip = '开启后生成保护平台，关闭后自动删除',
     Callback = function(Value)
@@ -991,7 +977,7 @@ Fpgn:AddSlider('GuardHitboxSizeSlider', {
     Text = '碰撞箱大小',
     Default = 4,
     Min = 1,
-    Max = 30,
+    Max = 10,
     Rounding = 0,
     Tooltip = '调整守卫头部碰撞箱大小',
     Callback = function(Value)
@@ -2389,29 +2375,6 @@ Owner:AddToggle("FakeVIP", {
             end
         end)
     end
-}):AddColorPicker("ClothingColor", {
-    Default = Color3.fromRGB(255, 255, 255),
-    Title = "衣服颜色",
-    Transparency = 0,
-    Callback = function(Value)
-        -- 只有 VIP 开关开着才生效
-        if not Toggles.FakeVIP or not Toggles.FakeVIP.Value then
-            Library:Notify("请先开启VIP", 2)
-            return
-        end
-        
-        pcall(function()
-            local player = game:GetService("Players").LocalPlayer
-            
-            -- 修改 Attribute 里的衣服颜色
-            player:SetAttribute("ClothingColor", Value)
-            
-            -- 如果游戏用其他属性名，同时设置常见变体
-            player:SetAttribute("ClothingColor", Value)
-            player:SetAttribute("ClothColor", Value)
-            player:SetAttribute("BodyColor", Value)
-        end)
-    end,
 })
 Owner:AddToggle("FakePermGuard", {
     Text = "永久守卫",
@@ -2427,7 +2390,6 @@ Owner:AddToggle("FakePermGuard", {
         end)
     end
 })
-
 Owner:AddToggle("Fake2xVote", {
     Text = "两倍投票",
     Default = false,
