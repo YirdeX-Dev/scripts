@@ -18,12 +18,33 @@ local Options = Library.Options
 local Toggles = Library.Toggles
 
 local Window = Library:CreateWindow({
-    Title = "YX Hub丨自动翻译",
-    Footer = "By Linni",
-    Icon = 122936242690381,
+    Title   = "YX-翻译工具",
+    Footer  = "YirdeX制作",
+    Size    = UDim2.fromOffset(750, 650),
+    Icon    = "rbxassetid://71400987113958",
+    AutoShow = true,
     NotifySide = "Right",
     ShowCustomCursor = true,
+    IconSize = UDim2.fromOffset(35, 35),
+    Resizable = true,
+    BackgroundImage = "rbxassetid://123887383447725",
+    BackgroundTransparency = 0.3,
+    BackgroundColor = Color3.fromRGB(0, 0, 0),
+    MobileButtonsSide = "Left",
+    DisableSearch = false,
+    SearchbarSize = UDim2.new(0.8, 0, 1, 0),
+    GlobalSearch = false,
+    Position = UDim2.fromOffset(100, 100),
+    Center = true,
+    EnableSidebarResize = true,
+    EnableCompacting = true,
+    SidebarCompacted = false,
+    MinContainerWidth = 256,
 })
+
+if Window and Window.TitleLabel then
+    Window.TitleLabel.RichText = true
+end
 
 local Tabs = {
     Translate = Window:AddTab("自动翻译", "languages"),
