@@ -3270,10 +3270,8 @@ local WeaponList = {
     "G3SG1",
 }
 
--- 存储选中的武器
 local selectedWeapons = {}
 
--- 多选下拉框（无默认选择）
 GuardGroup:AddDropdown("WeaponSelect", {
     Text = "选择武器",
     Values = WeaponList,
@@ -3287,7 +3285,6 @@ GuardGroup:AddDropdown("WeaponSelect", {
                 table.insert(selectedWeapons, name)
             end
         end
-        print("[守卫] 已选武器数量: " .. #selectedWeapons)
     end
 })
 
@@ -3312,19 +3309,16 @@ GuardGroup:AddButton({
         local bulletCount = tonumber(bulletInputValue)
 
         if not bulletCount or bulletCount < 0 then
-            Library:Notify("请输入有效的子弹数量！", 3)
             return
         end
 
         if #selectedWeapons == 0 then
-            Library:Notify("请先选择至少一把武器！", 3)
             return
         end
 
         local lp = game:GetService("Players").LocalPlayer
         local backpack = lp:FindFirstChild("Backpack")
         if not backpack then
-            Library:Notify("未找到背包！", 3)
             return
         end
 
@@ -3338,7 +3332,6 @@ GuardGroup:AddButton({
                 local infoModified = false
                 local infoClientModified = false
 
-                -- 同时修改 Info.Bullets 和 InfoClient.Bullets
                 local info = weapon:FindFirstChild("Info")
                 if info and info:FindFirstChild("Bullets") then
                     info.Bullets.Value = bulletCount
@@ -3351,7 +3344,6 @@ GuardGroup:AddButton({
                     infoClientModified = true
                 end
 
-                -- 两个路径全部同时修改才算成功
                 if infoModified and infoClientModified then
                     successCount = successCount + 1
                 elseif infoModified or infoClientModified then
@@ -3361,18 +3353,14 @@ GuardGroup:AddButton({
                 end
             else
                 failCount = failCount + 1
-                print("[守卫] 未在背包中找到武器: " .. weaponName)
             end
         end
 
         if successCount > 0 then
-            Library:Notify(string.format("成功修改 %d 把武器的子弹为 %d（两个路径全部修改）", successCount, bulletCount), 3)
         end
         if partialCount > 0 then
-            Library:Notify(string.format("%d 把武器仅修改了一个路径（Info或InfoClient缺失）", partialCount), 3)
         end
         if failCount > 0 then
-            Library:Notify(string.format("%d 把武器修改失败（未找到或无Bullets）", failCount), 3)
         end
     end,
     DoubleClick = false,
