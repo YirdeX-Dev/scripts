@@ -10,6 +10,14 @@ local HttpService       = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 
+-- A系列别名（兼容旧代码）
+local A1 = Players           -- A1 = Players
+local A2 = LocalPlayer       -- A2 = LocalPlayer
+local A3 = RunService        -- A3 = RunService
+local A6 = UserInputService  -- A6 = UserInputService
+local A7 = TeleportService   -- A7 = TeleportService
+local A8 = Workspace         -- A8 = Workspace
+
 local repo = "https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/"
 local Library     = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local SaveManager = loadstring(game:HttpGet(repo .. "SaveManager.lua"))()
@@ -381,13 +389,23 @@ local Bofang = Tabs.Main:AddRightGroupbox("播放功能", "film")
 local Yule = Tabs.Main:AddRightGroupbox("娱乐脚本功能", "gamepad")
 local RotationControlGroup = Tabs.Main:AddRightGroupbox("旋转控制", "redo")
 
-Tabs.Main:UpdateWarningBox({
-        Title = '脚本信息',
-        Text = '这里的功能请谨慎使用可能会被封禁，主要以缝合和二改不要再说我缝合我已经说了这个就是个缝合脚本中心OK？  \n致辞：秋辞 脚本中心汉化者：有芙同享  人机[<font color=\"rgb(255, 0, 0)\">谢谢您的使用，感谢大家</font>]',
-        IsNormal = true,
-        Visible = true,
-        LockSize = true,
-    })
+-- Wjty2 数据存储（兼容旧代码中的 Wjty2:SetData/GetData）
+local Wjty2 = {}
+local _wjty2_data = {}
+Wjty2.SetData = function(key, value) _wjty2_data[key] = value end
+Wjty2.GetData = function(key) return _wjty2_data[key] end
+
+-- getRoot 函数定义
+local function getRoot(character)
+    return character and (character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Torso")) or nil
+end
+
+-- antivoidloop 变量声明
+local antivoidloop = nil
+
+-- AimbotFOV 变量初始化
+local AimbotFOV = 150
+
 local A17 = nil;
 local A18 = false;
 local A19 = false;
@@ -501,9 +519,6 @@ game.Lighting.FogEnd = 100000
 game.Lighting.GlobalShadows = false
 game.Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 task.wait()
-end
-for i, v in pairs(_G.GetOldBright) do
-game.Lighting[i] = v
 end
     end
 })
@@ -1146,406 +1161,7 @@ end
 Afhubfygj:AddButton({
     Text = "翻译工具YX Hub",
     Func = function()
-        local repo = 'https://raw.githubusercontent.com/KingScriptAE/No-sirve-nada./refs/heads/main/'
-local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
-local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
-local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
-
-local Options = Library.Options
-local Toggles = Library.Toggles
-
-local Window = Library:CreateWindow({
-    Title = "YX Hub丨自动翻译",
-    Footer = "By Linni",
-    Icon = 122936242690381,
-    NotifySide = "Right",
-    ShowCustomCursor = true,
-})
-
-local Tabs = {
-    Translate = Window:AddTab("自动翻译", "languages"),
-    Settings = Window:AddTab("设置", "settings"),
-}
-
-local TranslateGroup = Tabs.Translate:AddLeftGroupbox("翻译设置")
-
-local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Chat = game:GetService("Chat")
-local LocalPlayer = Players.LocalPlayer
-
-local targetLang = "zh-CN"
-local maxTextLength = 500
-local baseScanInterval = 1.5
-local speedMultiplier = 2
-local translationMode = "智能翻译"
-local translateNumbers = false
-local translateSymbolsOnly = false
-local skipPlayerNames = false
-local autoTranslateEnabled = false
-local heartbeatConnection = nil
-local lastScanTime = 0
-
-local translationCache = {}
-local translatedInstances = {}
-
-local emoteKeywords = {
-    "neon", "shine", "ghost", "gold", "spin",
-    "bighead", "smallhead", "giant", "squash",
-}
-
-local function detectLanguage(text)
-    if not text or #text == 0 then
-        return "en"
-    end
-
-    local counts = {
-        cjk = 0,
-        zht = 0,
-        ko = 0,
-        ja = 0,
-        en = 0,
-    }
-
-    for _, code in utf8.codes(text) do
-        local char = utf8.char(code)
-        if char:match("[\228-\233][\128-\191][\128-\191]") then
-            counts.cjk += 1
-        elseif char:match("[\227][\128-\191][\128-\191]") then
-            counts.zht += 1
-        elseif char:match("[\234-\237][\128-\191]") then
-            counts.ko += 1
-        elseif char:match("[\227-\227][\128-\191][\128-\191]*") or char:match("[\227-\233][\128-\191]") then
-            counts.ja += 1
-        elseif char:match("[%a]") then
-            counts.en += 1
-        end
-    end
-
-    if counts.cjk > 3 then
-        return counts.zht > 3 and "zh-TW" or "zh-CN"
-    end
-    if counts.ko > 2 then
-        return "ko"
-    end
-    if counts.ja > 2 then
-        return "ja"
-    end
-    if counts.en > 5 then
-        return "en"
-    end
-    return "en"
-end
-
-local function shouldSkipText(text)
-    if not text or text == "" or translationCache[text] then
-        return true
-    end
-    if text:match("^%s*$") then
-        return true
-    end
-    if not translateNumbers and text:match("^[%d%.%%,%s:/]+$") then
-        return true
-    end
-    if not translateSymbolsOnly and text:match("^[^%w%s]+$") then
-        return true
-    end
-    if #text > maxTextLength then
-        return true
-    end
-    if not skipPlayerNames then
-        if Players:FindFirstChild(text) then
-            return true
-        end
-    end
-    local lower = string.lower(text)
-    for _, keyword in ipairs(emoteKeywords) do
-        if string.find(lower, keyword) then
-            return true
-        end
-    end
-    return false
-end
-
-local function shouldTranslateByMode(text, detectedLang)
-    if translationMode == "仅翻译英文" and detectedLang ~= "en" then
-        return false
-    end
-    if translationMode == "仅翻译日文" and detectedLang ~= "ja" then
-        return false
-    end
-    if translationMode == "仅翻译韩文" and detectedLang ~= "ko" then
-        return false
-    end
-    if translationMode == "快速翻译" and #text > 50 then
-        return false
-    end
-    return true
-end
-
-local function translateGoogle(text, fromLang, toLang)
-    local url = string.format(
-        "https://translate.googleapis.com/translate_a/single?client=gtx&sl=%s&tl=%s&dt=t&q=%s",
-        fromLang,
-        toLang,
-        HttpService:UrlEncode(text)
-    )
-
-    local ok, body = pcall(function()
-        return game:HttpGet(url, false, {
-            ["User-Agent"] = "Mozilla/5.0",
-        })
-    end)
-    if not ok or not body then
-        return nil
-    end
-
-    local decodeOk, data = pcall(HttpService.JSONDecode, HttpService, body)
-    if not decodeOk or not data or not data[1] then
-        return nil
-    end
-
-    local result = ""
-    for _, part in ipairs(data[1]) do
-        if part[1] then
-            result ..= part[1]
-        end
-    end
-    return result ~= "" and result or nil
-end
-
-local function translateMyMemory(text, fromLang, toLang)
-    local url = string.format(
-        "https://api.mymemory.translated.net/get?q=%s&langpair=%s|%s",
-        HttpService:UrlEncode(text),
-        fromLang,
-        toLang
-    )
-
-    local ok, body = pcall(function()
-        return game:HttpGet(url, false, {
-            ["User-Agent"] = "Roblox",
-        })
-    end)
-    if not ok or not body then
-        return nil
-    end
-
-    local decodeOk, data = pcall(HttpService.JSONDecode, HttpService, body)
-    if not decodeOk or not data or not data.responseData then
-        return nil
-    end
-    return data.responseData.translatedText
-end
-
-local function translateText(text)
-    if shouldSkipText(text) then
-        return translationCache[text] or text
-    end
-
-    local detected = detectLanguage(text)
-    if detected == "zh-CN" then
-        return text
-    end
-    if not shouldTranslateByMode(text, detected) then
-        return text
-    end
-
-    local translated = translateGoogle(text, detected, targetLang)
-    if translated then
-        translationCache[text] = translated
-        return translated
-    end
-
-    translated = translateMyMemory(text, detected, targetLang)
-    if translated then
-        translationCache[text] = translated
-        return translated
-    end
-
-    return text
-end
-
-local function isTextInstance(obj)
-    return obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")
-end
-
-local function shouldSkipInstance(obj)
-    if not obj then
-        return true
-    end
-    if obj == Chat or obj.Parent == Chat then
-        return true
-    end
-    local ancestor = obj:FindFirstAncestorWhichIsA("TextChannel")
-    if ancestor then
-        return true
-    end
-    return false
-end
-
-local function getText(instance)
-    if not isTextInstance(instance) then
-        return nil
-    end
-    if not instance.Text or instance.Text == "" or shouldSkipInstance(instance) then
-        return nil
-    end
-    return instance.Text
-end
-
-local function setText(instance, text)
-    if isTextInstance(instance) and not shouldSkipInstance(instance) then
-        instance.Text = text
-    end
-end
-
-local function translateInstance(instance)
-    if not isTextInstance(instance) or translatedInstances[instance] then
-        return false
-    end
-
-    local original = getText(instance)
-    if not original then
-        return false
-    end
-
-    translatedInstances[instance] = true
-    if getText(instance) == original then
-        setText(instance, translateText(original))
-        return true
-    end
-    return false
-end
-
-local function scanAndTranslate(root)
-    local now = tick()
-    if now - lastScanTime < baseScanInterval / speedMultiplier then
-        return 0
-    end
-    lastScanTime = now
-
-    local count = 0
-    for _, descendant in ipairs(root:GetDescendants()) do
-        if isTextInstance(descendant) and not translatedInstances[descendant] and not shouldSkipInstance(descendant) then
-            if translateInstance(descendant) then
-                count += 1
-            end
-        end
-    end
-    return count
-end
-
-local function onDescendantAdded(obj)
-    if not autoTranslateEnabled or not isTextInstance(obj) then
-        return
-    end
-    task.delay(0.1, function()
-        if obj.Parent and not shouldSkipInstance(obj) then
-            translateInstance(obj)
-        end
-    end)
-end
-
-TranslateGroup:AddLabel("注意：请先加载此脚本开启翻译，再加载你需要翻译的脚本", false)
-TranslateGroup:AddLabel("小部分特殊UI无法翻译", false)
-
-TranslateGroup:AddDropdown("TranslationMode", {
-    Values = { "智能翻译", "仅翻译英文", "仅翻译日文", "仅翻译韩文", "快速翻译" },
-    Default = 1,
-    Multi = false,
-    Text = "翻译模式",
-    Callback = function(Value)
-        translationMode = Value
-    end
-})
-
-TranslateGroup:AddToggle("AutoTranslate", {
-    Text = "启用自动翻译",
-    Default = false,
-    Callback = function(Value)
-        autoTranslateEnabled = Value
-        if Value then
-            if heartbeatConnection then
-                heartbeatConnection:Disconnect()
-            end
-            scanAndTranslate(LocalPlayer:WaitForChild("PlayerGui"))
-            heartbeatConnection = RunService.Heartbeat:Connect(function()
-                if autoTranslateEnabled then
-                    scanAndTranslate(LocalPlayer.PlayerGui)
-                end
-            end)
-        else
-            if heartbeatConnection then
-                heartbeatConnection:Disconnect()
-                heartbeatConnection = nil
-            end
-        end
-    end
-})
-
-TranslateGroup:AddSlider("TranslationSpeed", {
-    Text = "翻译速度",
-    Default = 2,
-    Min = 1,
-    Max = 5,
-    Rounding = 0,
-    Suffix = "x",
-    Callback = function(Value)
-        speedMultiplier = Value
-    end
-})
-
-TranslateGroup:AddToggle("TranslateNumbers", {
-    Text = "翻译数字",
-    Default = false,
-    Callback = function(Value)
-        translateNumbers = Value
-    end
-})
-TranslateGroup:AddToggle("TranslateSymbolsOnly", {
-    Text = "翻译纯符号",
-    Default = false,
-    Callback = function(Value)
-        translateSymbolsOnly = Value
-    end
-})
-TranslateGroup:AddToggle("SkipPlayerNames", {
-    Text = "跳过玩家名称",
-    Default = false,
-    Callback = function(Value)
-        skipPlayerNames = Value
-    end
-})
-TranslateGroup:AddButton({
-    Text = "官方群聊",
-    Desc = "点击复制群号",
-    Func = function()
-        if setclipboard then
-            setclipboard("766691084")
-            Library:Notify("已复制群号: 766691084", 3)
-        end
-    end,
-    DoubleClick = false,
-})
-
-local MenuGroup = Tabs.Settings:AddLeftGroupbox('菜单')
-MenuGroup:AddButton('卸载脚本', function() Library:Unload() end)
-MenuGroup:AddLabel('菜单快捷键'):AddKeyPicker('MenuKeybind', { Default = 'RightShift', NoUI = true, Text = 'Menu keybind' })
-
-Library.ToggleKeybind = Options.MenuKeybind
-
-ThemeManager:SetLibrary(Library)
-SaveManager:SetLibrary(Library)
-SaveManager:IgnoreThemeSettings()
-ThemeManager:SetFolder("MyScriptTheme")
-SaveManager:SetFolder("MyScriptConfig")
-SaveManager:BuildConfigSection(Tabs.Settings)
-ThemeManager:ApplyToTab(Tabs.Settings)
-
-LocalPlayer:WaitForChild("PlayerGui").DescendantAdded:Connect(onDescendantAdded)
-game:GetService("CoreGui").DescendantAdded:Connect(onDescendantAdded)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/YirdeX-Dev/scripts/refs/heads/main/YX%E7%BF%BB%E8%AF%91%E5%B7%A5%E5%85%B7.lua"))()
     end
 })
 local RunService = game:GetService("RunService")
@@ -1711,862 +1327,29 @@ RightGroup:AddButton({
 })
 RightGroup:AddButton({Text="加载AX汉化",Func=function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/fningna51-stack/-/main/%E6%96%B0AX%E6%B1%89%E5%8C%96%E5%BA%93"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
-end});
-RightGroup:AddButton({Text="柳叶碰飞(墨水可以使用)",Func=function()
-        local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local lp = Players.LocalPlayer
-
-local Enabled = false
-local targetPlayer = nil
-local originalCFrame = nil
-
-local function findPlayer(text)
-    text = text:lower()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if string.find(plr.Name:lower(), text) or string.find(plr.DisplayName:lower(), text) then
-            return plr
-        end
-    end
-end
-
-lp.Chatted:Connect(function(msg)
-    if not Enabled then return end
-    if msg:sub(1,6):lower() == ";kill " then
-        local name = msg:sub(7)
-        local plr = findPlayer(name)
-        if plr and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            targetPlayer = plr
-            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                originalCFrame = lp.Character.HumanoidRootPart.CFrame
-            end
-            if statusLabel then
-                statusLabel.Text = "已锁定 " .. plr.Name
-            end
-        end
-    end
-end)
-
-task.spawn(function()
-    while task.wait(0.01) do
-        if not Enabled then continue end
-        if not targetPlayer then continue end
-
-        local char = targetPlayer.Character
-        if not char or not char:FindFirstChild("Humanoid") then
-            targetPlayer = nil
-            if statusLabel then statusLabel.Text = "开启 (未锁定)" end
-            continue
-        end
-
-        local hum = char.Humanoid
-        if hum.Health <= 0 then
-            targetPlayer = nil
-            if statusLabel then statusLabel.Text = "开启 (未锁定)" end
-            continue
-        end
-
-        local myChar = lp.Character
-        local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
-        local targetHRP = char:FindFirstChild("HumanoidRootPart")
-
-        if myHRP and targetHRP then
-            local offset = targetHRP.Velocity.Magnitude < 0.1 and 0 or 7
-            local goal = targetHRP.CFrame * CFrame.new(0,0,-offset) * CFrame.Angles(0, math.rad(-3), 0)
-            myHRP.CFrame = myHRP.CFrame:Lerp(goal, 0.4)
-            myHRP.Velocity = Vector3.new(0,0,0)
-            myHRP.RotVelocity = Vector3.new(0,0,0)
-        end
-    end
-end)
-
-task.spawn(function()
-    while task.wait() do
-        if not Enabled then continue end
-        local hum = lp.Character and lp.Character:FindFirstChild("Humanoid")
-        if hum then
-            hum:Move(Vector3.one * 1e31)
-        end
-    end
-end)
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FlyOffGUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = lp:WaitForChild("PlayerGui")
-
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 220, 0, 130)
-mainFrame.Position = UDim2.new(0.5, -110, 0.3, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-mainFrame.BackgroundTransparency = 0.25
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Parent = screenGui
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = mainFrame
-
-local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(255, 255, 255)
-stroke.Thickness = 1
-stroke.Transparency = 0.8
-stroke.Parent = mainFrame
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 28)
-title.BackgroundTransparency = 1
-title.Text = "碰飞(碰到人就让对面甩飞)"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 14
-title.Font = Enum.Font.GothamBold
-title.Parent = mainFrame
-
-local toggleBtn = Instance.new("TextButton")
-toggleBtn.Size = UDim2.new(0, 160, 0, 32)
-toggleBtn.Position = UDim2.new(0.5, -80, 0, 38)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-toggleBtn.Text = "开启碰飞"
-toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleBtn.Font = Enum.Font.GothamSemibold
-toggleBtn.TextSize = 12
-toggleBtn.Parent = mainFrame
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0, 8)
-btnCorner.Parent = toggleBtn
-
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, 0, 0, 20)
-statusLabel.Position = UDim2.new(0, 0, 0, 78)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "状态: 关闭"
-statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-statusLabel.TextSize = 11
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.Parent = mainFrame
-
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 80, 0, 24)
-closeBtn.Position = UDim2.new(0.5, -40, 0, 102)
-closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-closeBtn.Text = "关闭甩飞脚本(关了需要重新加载)"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.Font = Enum.Font.GothamSemibold
-closeBtn.TextSize = 10
-closeBtn.Parent = mainFrame
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 6)
-closeCorner.Parent = closeBtn
-
-toggleBtn.MouseButton1Click:Connect(function()
-    Enabled = not Enabled
-    if Enabled then
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-        toggleBtn.Text = "关闭碰飞"
-        statusLabel.Text = "开启"
-        targetPlayer = nil
-    else
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-        toggleBtn.Text = "开启碰飞"
-        statusLabel.Text = "状态: 关闭"
-        targetPlayer = nil
-        originalCFrame = nil
-    end
-end)
-
-closeBtn.MouseButton1Click:Connect(function()
-    Enabled = false
-    targetPlayer = nil
-    originalCFrame = nil
-    screenGui:Destroy()
-end)
-
-Enabled = false
-targetPlayer = nil
-
-print("😝😝😝")
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 RightGroup:AddButton({Text="TX全自动翻译",Func=function()
         TX = "TX Script"
 Script = "全自动翻译"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/JsYb666/Item/refs/heads/main/Auto-language"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 RightGroup:AddButton({Text="TX死铁轨全自动刷债券",Func=function()
         TX = "TX Script"
 Script = "TX自动刷债券V4"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/JsYb666/Item/refs/heads/main/Auto-Bond-V4"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 RightGroup:AddButton({Text="SX翻译",Func=function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/SQ182/y/refs/heads/main/翻译.lua"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 RightGroup:AddButton({Text="音乐播放器脚本",Func=function()
         loadstring(game:HttpGet("http://music.567099.xyz/music.php"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 RightGroup:AddButton({Text="秋辞音乐播放器（绕过反作弊墨水可用）",Func=function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/fningna51-stack/-/main/AF%20%E9%9F%B3%E4%B9%90%E8%84%9A%E6%9C%AC"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
-Ksqcnbcos:AddButton({Text="下面不好用，用这个透视",Func=function()
+Ksqcnbcos:AddButton({Text="透视",Func=function()
         loadstring(game:HttpGet("https://vss.pandauth.com/kv/5fce9c01afe67a71"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
-Ksqcnbcos:AddToggle('ESPToggle', {
-    Text = '方框透视',
-    Default = false,
-    Tooltip = '显示玩家方框 ESP',
-    Callback = function(Value)
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-        local Camera = workspace.CurrentCamera
-        local LocalPlayer = Players.LocalPlayer
-
-        if Value then
-            if getgenv().cyberline_esp_boxes then
-                for _, v in pairs(getgenv().cyberline_esp_boxes) do
-                    pcall(function() v.box:Remove() end)
-                    pcall(function() v.outline:Remove() end)
-                end
-            end
-            getgenv().cyberline_esp_boxes = {}
-
-            local function create_box()
-                local outline = Drawing.new("Square")
-                outline.Color = Color3.new(0, 0, 0)
-                outline.Thickness = 1
-                outline.Filled = false
-                outline.Visible = false
-
-                local box = Drawing.new("Square")
-                box.Color = Color3.fromRGB(255, 255, 255)
-                box.Thickness = 1
-                box.Filled = false
-                box.Visible = false
-
-                return { box = box, outline = outline }
-            end
-
-            local function get_bounds(char)
-                local min = Vector3.new(1e9, 1e9, 1e9)
-                local max = Vector3.new(-1e9, -1e9, -1e9)
-                for _, p in char:GetDescendants() do
-                    if p:IsA("BasePart") then
-                        local pos = p.Position
-                        min = Vector3.new(
-                            math.min(min.X, pos.X),
-                            math.min(min.Y, pos.Y),
-                            math.min(min.Z, pos.Z)
-                        )
-                        max = Vector3.new(
-                            math.max(max.X, pos.X),
-                            math.max(max.Y, pos.Y),
-                            math.max(max.Z, pos.Z)
-                        )
-                    end
-                end
-                return min, max
-            end
-
-            getgenv().cyberline_esp_conn = RunService.RenderStepped:Connect(function()
-                for _, plr in ipairs(Players:GetPlayers()) do
-                    if plr ~= LocalPlayer
-                        and plr.Character
-                        and plr.Character:FindFirstChild("HumanoidRootPart") then
-
-                        local min, max = get_bounds(plr.Character)
-                        local points = {
-                            Vector3.new(min.X, min.Y, min.Z),
-                            Vector3.new(min.X, max.Y, min.Z),
-                            Vector3.new(max.X, min.Y, min.Z),
-                            Vector3.new(max.X, max.Y, min.Z),
-                            Vector3.new(min.X, min.Y, max.Z),
-                            Vector3.new(min.X, max.Y, max.Z),
-                            Vector3.new(max.X, min.Y, max.Z),
-                            Vector3.new(max.X, max.Y, max.Z),
-                        }
-
-                        local min2d = Vector2.new(1e9, 1e9)
-                        local max2d = Vector2.new(-1e9, -1e9)
-                        local visible = false
-
-                        for _, pt in ipairs(points) do
-                            local screen, onScreen = Camera:WorldToViewportPoint(pt)
-                            if onScreen then
-                                visible = true
-                                min2d = Vector2.new(
-                                    math.min(min2d.X, screen.X),
-                                    math.min(min2d.Y, screen.Y)
-                                )
-                                max2d = Vector2.new(
-                                    math.max(max2d.X, screen.X),
-                                    math.max(max2d.Y, screen.Y)
-                                )
-                            end
-                        end
-
-                        if not getgenv().cyberline_esp_boxes[plr] then
-                            getgenv().cyberline_esp_boxes[plr] = create_box()
-                        end
-
-                        local b = getgenv().cyberline_esp_boxes[plr]
-                        if visible then
-                            local size = max2d - min2d
-                            b.box.Position = min2d
-                            b.box.Size = size
-                            b.box.Visible = true
-
-                            b.outline.Position = min2d - Vector2.new(1, 1)
-                            b.outline.Size = size + Vector2.new(2, 2)
-                            b.outline.Visible = true
-                        else
-                            b.box.Visible = false
-                            b.outline.Visible = false
-                        end
-                    end
-                end
-            end)
-
-            Library:Notify("方框透视 已开启", 2)
-        else
-            if getgenv().cyberline_esp_conn then
-                getgenv().cyberline_esp_conn:Disconnect()
-            end
-            if getgenv().cyberline_esp_boxes then
-                for _, v in pairs(getgenv().cyberline_esp_boxes) do
-                    pcall(function() v.box:Remove() end)
-                    pcall(function() v.outline:Remove() end)
-                end
-            end
-            getgenv().cyberline_esp_boxes = nil
-            Library:Notify("方框透视 已关闭", 2)
-        end
-    end
-})
-getgenv().cyberline_chams = {}
-getgenv().cyberline_chams_conn = nil
-getgenv().cyberline_chams_color = Color3.fromRGB(255, 255, 255)
-
-Ksqcnbcos:AddToggle('ChamsToggle', {
-    Text = '人物透视',
-    Default = false,
-    Tooltip = '显示玩家模型高亮透视',
-    Callback = function(Value)
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-        local LocalPlayer = Players.LocalPlayer
-
-        if Value then
-            if getgenv().cyberline_chams then
-                for _, hl in pairs(getgenv().cyberline_chams) do
-                    pcall(function() hl:Destroy() end)
-                end
-            end
-            getgenv().cyberline_chams = {}
-
-            getgenv().cyberline_chams_conn = RunService.RenderStepped:Connect(function()
-                for _, plr in ipairs(Players:GetPlayers()) do
-                    if plr ~= LocalPlayer
-                        and plr.Character
-                        and not getgenv().cyberline_chams[plr] then
-
-                        local highlight = Instance.new("Highlight")
-                        highlight.Name = "CyberlineChams"
-                        highlight.FillColor = getgenv().cyberline_chams_color
-                        highlight.OutlineColor = Color3.new(0, 0, 0)
-                        highlight.FillTransparency = 0.8
-                        highlight.OutlineTransparency = 1
-                        highlight.Adornee = plr.Character
-                        highlight.Parent = game.CoreGui
-
-                        getgenv().cyberline_chams[plr] = highlight
-                    end
-                end
-            end)
-
-            Library:Notify("人物透视 已开启", 2)
-        else
-            if getgenv().cyberline_chams_conn then
-                getgenv().cyberline_chams_conn:Disconnect()
-            end
-            if getgenv().cyberline_chams then
-                for _, hl in pairs(getgenv().cyberline_chams) do
-                    pcall(function() hl:Destroy() end)
-                end
-            end
-            getgenv().cyberline_chams = nil
-            Library:Notify("人物透视 已关闭", 2)
-        end
-    end
-}):AddColorPicker('ChamsColorPicker', {
-    Default = Color3.fromRGB(255, 255, 255),
-    Title = '透视颜色',
-    Transparency = 0,
-    Callback = function(Value)
-        getgenv().cyberline_chams_color = Value
-
-        if getgenv().cyberline_chams then
-            for _, hl in pairs(getgenv().cyberline_chams) do
-                if hl and hl:IsA("Highlight") then
-                    hl.FillColor = Value
-                end
-            end
-        end
-    end
-})
-Ksqcnbcos:AddToggle('NameESPToggle', {
-    Text = '名字透视',
-    Default = false,
-    Tooltip = '显示玩家头顶名字',
-    Callback = function(Value)
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-        local Camera = workspace.CurrentCamera
-        local LocalPlayer = Players.LocalPlayer
-
-        if Value then
-            if getgenv().cyberline_name_esp then
-                for _, txt in pairs(getgenv().cyberline_name_esp) do
-                    pcall(function() txt:Remove() end)
-                end
-            end
-            getgenv().cyberline_name_esp = {}
-
-            local function create_name_label()
-                local text = Drawing.new("Text")
-                text.Size = 12
-                text.Center = true
-                text.Outline = true
-                text.Font = 2 -- Inconsolata
-                text.Color = Color3.fromRGB(255, 255, 255)
-                text.Visible = false
-                return text
-            end
-
-            getgenv().cyberline_name_esp_conn = RunService.RenderStepped:Connect(function()
-                for _, plr in ipairs(Players:GetPlayers()) do
-                    if plr ~= LocalPlayer
-                        and plr.Character
-                        and plr.Character:FindFirstChild("Head") then
-
-                        local head = plr.Character.Head
-                        local screenPos, onScreen =
-                            Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 1.8, 0))
-
-                        if not getgenv().cyberline_name_esp[plr] then
-                            getgenv().cyberline_name_esp[plr] = create_name_label()
-                        end
-
-                        local text = getgenv().cyberline_name_esp[plr]
-
-                        if onScreen then
-                            text.Position = Vector2.new(screenPos.X, screenPos.Y)
-                            text.Text = plr.Name
-                            text.Visible = true
-                        else
-                            text.Visible = false
-                        end
-                    elseif getgenv().cyberline_name_esp[plr] then
-                        getgenv().cyberline_name_esp[plr].Visible = false
-                    end
-                end
-            end)
-
-            Library:Notify("名字透视 已开启", 2)
-        else
-            if getgenv().cyberline_name_esp_conn then
-                getgenv().cyberline_name_esp_conn:Disconnect()
-            end
-            if getgenv().cyberline_name_esp then
-                for _, txt in pairs(getgenv().cyberline_name_esp) do
-                    pcall(function() txt:Remove() end)
-                end
-            end
-            getgenv().cyberline_name_esp = nil
-            Library:Notify("名字透视 已关闭", 2)
-        end
-    end
-})
-Ksqcnbcos:AddToggle('HealthBarToggle', {
-    Text = '血量条透视',
-    Default = false,
-    Tooltip = '显示玩家血量条',
-    Callback = function(Value)
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-        local Camera = workspace.CurrentCamera
-        local LocalPlayer = Players.LocalPlayer
-
-        if Value then
-            if getgenv().cyberline_health_bars then
-                for _, v in pairs(getgenv().cyberline_health_bars) do
-                    pcall(function() v.bar:Remove() end)
-                    pcall(function() v.outline:Remove() end)
-                end
-            end
-            getgenv().cyberline_health_bars = {}
-
-            local function create_bar()
-                local outline = Drawing.new("Square")
-                outline.Color = Color3.new(0, 0, 0)
-                outline.Filled = true
-                outline.Transparency = 1
-                outline.Visible = false
-
-                local bar = Drawing.new("Square")
-                bar.Color = Color3.fromRGB(0, 255, 0)
-                bar.Filled = true
-                bar.Transparency = 1
-                bar.Visible = false
-
-                return { bar = bar, outline = outline }
-            end
-
-            local function get_bounds(char)
-                local min = Vector3.new(1e9, 1e9, 1e9)
-                local max = Vector3.new(-1e9, -1e9, -1e9)
-                for _, p in char:GetDescendants() do
-                    if p:IsA("BasePart") then
-                        local pos = p.Position
-                        min = Vector3.new(
-                            math.min(min.X, pos.X),
-                            math.min(min.Y, pos.Y),
-                            math.min(min.Z, pos.Z)
-                        )
-                        max = Vector3.new(
-                            math.max(max.X, pos.X),
-                            math.max(max.Y, pos.Y),
-                            math.max(max.Z, pos.Z)
-                        )
-                    end
-                end
-                return min, max
-            end
-
-            getgenv().cyberline_health_bar_conn = RunService.RenderStepped:Connect(function()
-                for _, plr in ipairs(Players:GetPlayers()) do
-                    if plr ~= LocalPlayer
-                        and plr.Character
-                        and plr.Character:FindFirstChild("HumanoidRootPart") then
-
-                        local humanoid = plr.Character:FindFirstChildWhichIsA("Humanoid")
-                        if humanoid then
-                            local min, max = get_bounds(plr.Character)
-                            local points = {
-                                Vector3.new(min.X, min.Y, min.Z),
-                                Vector3.new(min.X, max.Y, min.Z),
-                                Vector3.new(max.X, min.Y, min.Z),
-                                Vector3.new(max.X, max.Y, min.Z),
-                                Vector3.new(min.X, min.Y, max.Z),
-                                Vector3.new(min.X, max.Y, max.Z),
-                                Vector3.new(max.X, min.Y, max.Z),
-                                Vector3.new(max.X, max.Y, max.Z),
-                            }
-
-                            local min2d = Vector2.new(1e9, 1e9)
-                            local max2d = Vector2.new(-1e9, -1e9)
-                            local visible = false
-
-                            for _, pt in ipairs(points) do
-                                local screen, onScreen = Camera:WorldToViewportPoint(pt)
-                                if onScreen then
-                                    visible = true
-                                    min2d = Vector2.new(
-                                        math.min(min2d.X, screen.X),
-                                        math.min(min2d.Y, screen.Y)
-                                    )
-                                    max2d = Vector2.new(
-                                        math.max(max2d.X, screen.X),
-                                        math.max(max2d.Y, screen.Y)
-                                    )
-                                end
-                            end
-
-                            if not getgenv().cyberline_health_bars[plr] then
-                                getgenv().cyberline_health_bars[plr] = create_bar()
-                            end
-
-                            local bar = getgenv().cyberline_health_bars[plr].bar
-                            local outline = getgenv().cyberline_health_bars[plr].outline
-
-                            if visible then
-                                local height = max2d.Y - min2d.Y
-                                local ratio = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
-                                local barHeight = height * ratio
-
-                                bar.Size = Vector2.new(2, barHeight)
-                                bar.Position = Vector2.new(min2d.X - 5, max2d.Y - barHeight)
-                                bar.Visible = true
-
-                                outline.Size = Vector2.new(4, height + 2)
-                                outline.Position = Vector2.new(min2d.X - 6, min2d.Y - 1)
-                                outline.Visible = true
-                            else
-                                bar.Visible = false
-                                outline.Visible = false
-                            end
-                        end
-                    elseif getgenv().cyberline_health_bars[plr] then
-                        getgenv().cyberline_health_bars[plr].bar.Visible = false
-                        getgenv().cyberline_health_bars[plr].outline.Visible = false
-                    end
-                end
-            end)
-
-            Library:Notify("血量条透视 已开启", 2)
-        else
-            if getgenv().cyberline_health_bar_conn then
-                getgenv().cyberline_health_bar_conn:Disconnect()
-            end
-            if getgenv().cyberline_health_bars then
-                for _, v in pairs(getgenv().cyberline_health_bars) do
-                    pcall(function() v.bar:Remove() end)
-                    pcall(function() v.outline:Remove() end)
-                end
-            end
-            getgenv().cyberline_health_bars = nil
-            Library:Notify("血量条透视 已关闭", 2)
-        end
-    end
-})
-Ksqcnbcos:AddToggle('SkeletonToggle', {
-    Text = '骨骼透视',
-    Default = false,
-    Tooltip = '显示玩家骨骼线条',
-    Callback = function(Value)
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-        local Camera = workspace.CurrentCamera
-        local LocalPlayer = Players.LocalPlayer
-
-        if Value then
-            if getgenv().cyberline_skeleton then
-                for _, skel in pairs(getgenv().cyberline_skeleton) do
-                    for _, line in pairs(skel) do
-                        pcall(function() line:Remove() end)
-                    end
-                end
-            end
-            getgenv().cyberline_skeleton = {}
-
-            local function create_line()
-                local line = Drawing.new("Line")
-                line.Color = Color3.new(1, 1, 1)
-                line.Thickness = 1
-                line.Transparency = 1
-                line.Visible = false
-                return line
-            end
-
-            local function create_skeleton()
-                return {
-                    head = create_line(),
-                    torso = create_line(),
-                    left_arm = create_line(),
-                    right_arm = create_line(),
-                    left_leg = create_line(),
-                    right_leg = create_line()
-                }
-            end
-
-            getgenv().cyberline_skeleton_conn = RunService.RenderStepped:Connect(function()
-                for _, plr in ipairs(Players:GetPlayers()) do
-                    if plr ~= LocalPlayer and plr.Character then
-                        local char = plr.Character
-
-                        local parts = {
-                            head = char:FindFirstChild("Head"),
-                            upper = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso"),
-                            lower = char:FindFirstChild("LowerTorso") or char:FindFirstChild("HumanoidRootPart"),
-                            left_arm = char:FindFirstChild("LeftUpperArm") or char:FindFirstChild("Left Arm"),
-                            right_arm = char:FindFirstChild("RightUpperArm") or char:FindFirstChild("Right Arm"),
-                            left_leg = char:FindFirstChild("LeftUpperLeg") or char:FindFirstChild("Left Leg"),
-                            right_leg = char:FindFirstChild("RightUpperLeg") or char:FindFirstChild("Right Leg"),
-                        }
-
-                        if not getgenv().cyberline_skeleton[plr] then
-                            getgenv().cyberline_skeleton[plr] = create_skeleton()
-                        end
-
-                        local skel = getgenv().cyberline_skeleton[plr]
-
-                        local function to_screen(part)
-                            local pos, onScreen = Camera:WorldToViewportPoint(part.Position)
-                            return Vector2.new(pos.X, pos.Y), onScreen
-                        end
-
-                        local allVisible = true
-                        for _, part in pairs(parts) do
-                            if not part then
-                                allVisible = false
-                                break
-                            end
-                        end
-
-                        if allVisible then
-                            local head_pos = to_screen(parts.head)
-                            local upper_pos = to_screen(parts.upper)
-                            local lower_pos = to_screen(parts.lower)
-                            local larm_pos = to_screen(parts.left_arm)
-                            local rarm_pos = to_screen(parts.right_arm)
-                            local lleg_pos = to_screen(parts.left_leg)
-                            local rleg_pos = to_screen(parts.right_leg)
-
-                            skel.head.From = head_pos
-                            skel.head.To = upper_pos
-
-                            skel.torso.From = upper_pos
-                            skel.torso.To = lower_pos
-
-                            skel.left_arm.From = upper_pos
-                            skel.left_arm.To = larm_pos
-
-                            skel.right_arm.From = upper_pos
-                            skel.right_arm.To = rarm_pos
-
-                            skel.left_leg.From = lower_pos
-                            skel.left_leg.To = lleg_pos
-
-                            skel.right_leg.From = lower_pos
-                            skel.right_leg.To = rleg_pos
-
-                            for _, line in pairs(skel) do
-                                line.Visible = true
-                            end
-                        else
-                            for _, line in pairs(skel) do
-                                line.Visible = false
-                            end
-                        end
-                    elseif getgenv().cyberline_skeleton[plr] then
-                        for _, line in pairs(getgenv().cyberline_skeleton[plr]) do
-                            line.Visible = false
-                        end
-                    end
-                end
-            end)
-
-            Library:Notify("骨骼透视 已开启", 2)
-        else
-            if getgenv().cyberline_skeleton_conn then
-                getgenv().cyberline_skeleton_conn:Disconnect()
-            end
-            if getgenv().cyberline_skeleton then
-                for _, skel in pairs(getgenv().cyberline_skeleton) do
-                    for _, line in pairs(skel) do
-                        pcall(function() line:Remove() end)
-                    end
-                end
-            end
-            getgenv().cyberline_skeleton = nil
-            Library:Notify("骨骼透视 已关闭", 2)
-        end
-    end
-})
-Ksqcnbcos:AddToggle('TracerToggle', {
-    Text = '射线透视',
-    Default = false,
-    Tooltip = '从屏幕顶部指向玩家',
-    Callback = function(Value)
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-        local Camera = workspace.CurrentCamera
-        local LocalPlayer = Players.LocalPlayer
-
-        if Value then
-            if getgenv().cyberline_tracers then
-                for _, line in pairs(getgenv().cyberline_tracers) do
-                    pcall(function() line:Remove() end)
-                end
-            end
-            getgenv().cyberline_tracers = {}
-
-            local function create_tracer()
-                local line = Drawing.new("Line")
-                line.Color = Color3.fromRGB(255, 255, 255)
-                line.Thickness = 1
-                line.Transparency = 1
-                line.Visible = false
-                return line
-            end
-
-            getgenv().cyberline_tracer_conn = RunService.RenderStepped:Connect(function()
-                for _, plr in ipairs(Players:GetPlayers()) do
-                    if plr ~= LocalPlayer
-                        and plr.Character
-                        and plr.Character:FindFirstChild("HumanoidRootPart") then
-
-                        local root = plr.Character.HumanoidRootPart
-                        local screenPos, onScreen =
-                            Camera:WorldToViewportPoint(root.Position)
-
-                        if not getgenv().cyberline_tracers[plr] then
-                            getgenv().cyberline_tracers[plr] = create_tracer()
-                        end
-
-                        local tracer = getgenv().cyberline_tracers[plr]
-
-                        if onScreen then
-                            tracer.From = Vector2.new(
-                                Camera.ViewportSize.X / 2,
-                                0
-                            )
-                            tracer.To = Vector2.new(screenPos.X, screenPos.Y)
-                            tracer.Visible = true
-                        else
-                            tracer.Visible = false
-                        end
-                    elseif getgenv().cyberline_tracers[plr] then
-                        getgenv().cyberline_tracers[plr].Visible = false
-                    end
-                end
-            end)
-
-            Library:Notify("射线透视 已开启", 2)
-        else
-            if getgenv().cyberline_tracer_conn then
-                getgenv().cyberline_tracer_conn:Disconnect()
-            end
-            if getgenv().cyberline_tracers then
-                for _, line in pairs(getgenv().cyberline_tracers) do
-                    pcall(function() line:Remove() end)
-                end
-            end
-            getgenv().cyberline_tracers = nil
-            Library:Notify("射线透视 已关闭", 2)
-        end
-    end
-})
 Sjgnfh:AddLabel("这些功能均为缝合(除了环绕光环以外)")
 Sjgnfh:AddLabel("视觉源码群聊：798869680")
 Sjgnfh:AddLabel("作者：妖月季")
@@ -4136,7 +2919,7 @@ local bars = {}
 local currentSound = nil
 local musicDropdown = nil
 
-Sjgnfh:AddToggle('AuraToggle', {
+Sjgnfh:AddToggle('AuraToggle2', {
     Text = '环绕光环(音乐版)',
     Default = false,
     Tooltip = '以玩家为中心生成 3D 环绕音浪光环',
@@ -4277,7 +3060,7 @@ Sjgnfh:AddToggle('AuraToggle', {
     end
 })
 Bofang:AddLabel("选择即可播放")
-Bofang:AddDropdown("MusicSelect", {
+Bofang:AddDropdown("MusicSelect2", {
     Text = "选择音乐",
     Default = "无",
     Values = {
@@ -4358,68 +3141,32 @@ Bofang:AddButton({
 Yule:AddLabel("柳宗权同款撸屌脚本(不能在墨水使用)");
 Yule:AddButton({Text="撸屌R6",Func=function()
         loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddButton({Text="撸屌R15",Func=function()
         loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddLabel("动作类");
 Yule:AddButton({Text="飞踢脚本",Func=function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fe-DropKick-Script-165813"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddButton({Text="无敌少侠脚本",Func=function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/giobolqvi1/Omni-man-fly-by-GioBolqv1/refs/heads/main/omniman.lua"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddButton({Text="新版甩飞（墨水可用）",Func=function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/fningna51-stack/-/main/%E7%94%A9%E9%A3%9E"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddButton({Text="祖国人脚本",Func=function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/giobolqv1/homelander-by-GioBolqv1-/main/homelander.lua"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddButton({Text="VR脚本",Func=function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/randomstring0/Qwerty/refs/heads/main/qwerty45.lua"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddButton({Text="4000种动作脚本",Func=function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddLabel("飞行类");
 Yule:AddButton({Text="无敌少侠飞行脚本",Func=function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Invinicible-Flight-R15-45414"))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddButton({Text="联邦GUI飞行脚本",Func=function()
         local RunService = game:GetService("RunService")
@@ -4704,18 +3451,10 @@ RunService.Stepped:Connect(function()
         LocalPlayer.Character.Humanoid.WalkSpeed = 16 * walkSpeedMult
     end
 end)
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddLabel("武器类");
 Yule:AddButton({Text="AK47脚本(别人看不到)",Func=function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/sinret/rbxscript.com-scripts-reuploads-/main/ak47", true))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Yule:AddButton({Text="通用枪械脚本愤怒机器人",Func=function()
         loadstring(string.char(
@@ -4724,10 +3463,6 @@ Yule:AddButton({Text="通用枪械脚本愤怒机器人",Func=function()
     104,116,116,112,115,58,47,47,97,112,105,46,99,104,101,97,116,103,112,116,46,99,99,34,44,32,
     116,114,117,101,41,41,40,41
 ))()
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 RotationControlGroup:AddButton({Text="旋转 10",Func=function()
         if (A2 and A2.Character) then
@@ -5335,10 +4070,6 @@ mini2.MouseButton1Click:Connect(function()
 	main.Frame.BackgroundTransparency = 0 
 	closebutton.Position =  UDim2.new(0, 0, -1, 27)
 end)
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Cnmb:AddButton({Text="重新加载角色",Func=function()
         if A2.Character then
@@ -5347,10 +4078,6 @@ Cnmb:AddButton({Text="重新加载角色",Func=function()
 end});
 Cnmb:AddButton({Text="通用甩飞[不能在墨水使用，秒封]",Func=function()
         local ScriptContent = game:HttpGet("https://pastebin.com/raw/zqyDSUWX");
-        local Func = loadstring(ScriptContent);
-        if Func then
-                Func();
-        end
 end});
 Cnmb:AddButton({
     Text = "无敌",
@@ -5758,11 +4485,6 @@ Cnmb:AddButton({
     Text = '获取传送工具',
     Tooltip = '点击后获得一个点击传送工具',
     Callback = function()
-        if not Toggles.TeleportToolToggle.Value then
-            warn("[传送工具] 请先开启开关")
-            return
-        end
-
         local Mouse = LocalPlayer:GetMouse()
 
         local Tool = Instance.new("Tool")
@@ -5866,7 +4588,7 @@ MenuGroup:AddToggle("ShowCustomCursor", {
         Library.ShowCustomCursor = State
     end
 })
-MenuGroup:AddToggle("ShowCustomCursor", {
+MenuGroup:AddToggle("ShowCustomCursor2", {
     Text = "自定义鼠标指针",
     Default = true,
     Callback = function(Value)
@@ -6003,7 +4725,7 @@ MenuGroup:AddButton("卸载脚本", function()
     Library:Unload()
 end)
 
-local Bjtsz = Tabs.Settings:AddRightGroupbox("图片切换", "gallery-vertical-end"
+local Bjtsz = Tabs.Settings:AddRightGroupbox("图片切换", "gallery-vertical-end")
 
 Bjtsz:AddButton({
     Text = '加载背景图片1',
@@ -6064,6 +4786,7 @@ Bjtsz:AddButton({
     DoubleClick = false,
 })
 
+Library:AddDraggableLabel("欢迎使用YX HUB\n科技与你无限\nYX重启未来")
 Library.ToggleKeybind = Options.MenuKeybind
 
 ThemeManager:SetLibrary(Library)
