@@ -39,6 +39,10 @@ local Window = Library:CreateWindow({
     ShowCustomCursor = true,
     IconSize = UDim2.fromOffset(35, 35),
     Resizable = true,
+    BackgroundImage = "rbxassetid://123887383447725",--这里改你的图片背景
+	BackgroundTransparency = 0.3, 
+	BackgroundColor = Color3.fromRGB(0, 0, 0),
+
     MobileButtonsSide = "Left",
     DisableSearch = false,
     SearchbarSize = UDim2.new(0.8, 0, 1, 0),
@@ -223,24 +227,12 @@ local scriptCategories = {
         }
     },
     {
-        GroupName = "跳跃对决",
-        List = {
-            {Name = "跳跃对决脚本", Url = "https://raw.githubusercontent.com/solarastuff/sorryjimpee/refs/heads/main/Jumper.lua"},
-        }
-    },
-    {
         GroupName = "死亡球",
         List = {
             {Name = "死亡球Fluxin汉化脚本(要卡密)", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/deathball-Fluxin-robot"},
             {Name = "死亡球stark汉化脚本(要卡密)", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/Deathballs-stark-robot"},
             {Name = "NodeX死亡球", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/NodeX%E5%88%80%E5%88%83%E5%89%91.lua"},
             {Name = "Achaotic死亡球", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/Achaotic%E5%88%80%E5%88%83%E7%90%83"},
-        }
-    },
-    {
-        GroupName = "监狱人生",
-        List = {
-            {Name = "监狱人生人机汉化脚本", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/PrisonLife-Serk4rx-robot"},
         }
     },
     {
@@ -254,83 +246,6 @@ local scriptCategories = {
         GroupName = "盲射",
         List = {
             {Name = "盲射ToraIsMe汉化脚本", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/blindshot-ToraIsMe-robot"},
-        }
-    },
-    {
-        GroupName = "彩虹朋友",
-        List = {
-            {Name = "彩虹朋友二UB汉化脚本(要卡密)", Url = "https://raw.githubusercontent.com/Clover781/m/refs/heads/main/RainbowFriends-UB-robot"},
-        }
-    },
-    {
-        GroupName = "撕咬之夜",
-        List = {
-            {Name = "撕咬之夜", Url = "https://raw.githubusercontent.com/Youfutongxiang1/Msploit-v2-CN/refs/heads/main/Msploit-v2-CN"},
-            {Name = "殺脚本撕咬之夜", Url = "https://raw.githubusercontent.com/FengYu-X/Max/refs/heads/X/BBN.lua"},
-            {Name = "Ringta撕咬之夜(汉化)", Url = "https://raw.githubusercontent.com/Youfutongxiang1/RINGTA-BitebyNight-CN/refs/heads/main/RINGTA/Bite%20by%20Night-CN"},
-            {Name = "撕咬之夜", Url = "https://raw.githubusercontent.com/YIRDEX/China/refs/heads/main/Cerberus"},
-        }
-    },
-    {
-        GroupName = "死刑",
-        List = {
-            {Name = "死刑脚本(无卡密)", Url = "https://api.luarmor.net/files/v3/loaders/8c08b8f2252eec7dbb77d253d269bb65.lua"},
-        }
-    },
-    {
-        GroupName = "活了7天",
-        List = {
-            {Name = "活了7天刷废料", Url = "https://raw.githubusercontent.com/rndmq/Serverlist/refs/heads/main/Server87"},
-            {Name = "活了7天汉化", Url = "https://raw.githubusercontent.com/ke9460394-dot/ugik/refs/heads/main/%E4%B8%83%E6%97%A5%E7%94%9F%E6%88%90kkk.txt"},
-        }
-    },
-    {
-        GroupName = "终极战场",
-        List = {
-            {Name = "终极战场脚本", Url = "https://raw.githubusercontent.com/YQANTGV3/YQANTGV3/refs/heads/main/antitamper.txt"},
-        }
-    },
-    {
-        GroupName = "餐厅大亨",
-        List = {
-            {Name = "餐厅大亨脚本(自动解卡无卡密)", Url = "https://rawscripts.net/raw/Universal-Script-Samuraa1-Hub-Best-Keyless-Script-For-EA-ByB-RT3-etc-88197"},
-        }
-    },
-    {
-        GroupName = "恐鬼症",
-        List = {
-            {Name = "恐鬼症脚本", Url = "https://raw.githubusercontent.com/longchneg/GAl/refs/heads/Dragon/%E6%81%90%E9%AC%BC%E7%97%87%20%E5%85%8D%E8%B4%B9%E7%89%88"},
-            {Name = "恐鬼症付费脚本(免费用)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E6%81%90%E9%AC%BC%E7%97%87"},
-        }
-    },
-    {
-        GroupName = "力量传奇",
-        List = {
-            {Name = "Yttrium力量传奇付费脚本(免费用)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E5%8A%9B%E9%87%8F%E4%BC%A0%E5%A5%87%E8%84%9A%E6%9C%AC"},
-        }
-    },
-    {
-        GroupName = "通缉",
-        List = {
-            {Name = "Yttrium通缉付费脚本(免费用)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E9%80%9A%E7%BC%89%E8%84%9A%E6%9C%AC%E5%85%8D%E8%B4%B9%E7%89%88"},
-        }
-    },
-    {
-        GroupName = "GB内脏与黑火药",
-        List = {
-            {Name = "GB汉化脚本(需要解卡和AX一样)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/AF%20%E7%A7%8B%E5%AE%B9GB"},
-        }
-    },
-    {
-        GroupName = "攻击泰坦革命",
-        List = {
-            {Name = "攻击泰坦革命脚本(英文版)", Url = "https://api.luarmor.net/files/v4/loaders/705e7fe7aa288f0fe86900cedb1119b1.lua"},
-        }
-    },
-    {
-        GroupName = "犯罪",
-        List = {
-            {Name = "犯罪脚本付费版(免费用)", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/%E7%8A%AF%E7%BD%AA"},
         }
     },
     {
