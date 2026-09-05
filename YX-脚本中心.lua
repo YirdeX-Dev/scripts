@@ -6064,7 +6064,6 @@ Bjtsz:AddButton({
     DoubleClick = false,
 })
 
-Library:AddDraggableLabel("欢迎使用YX HUB\n科技与你无限\nYX重启未来")
 Library.ToggleKeybind = Options.MenuKeybind
 
 ThemeManager:SetLibrary(Library)
