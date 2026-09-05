@@ -3265,7 +3265,6 @@ Players2:AddButton({
 
 local GuardGroup = Tabs.guard:AddLeftGroupbox("守卫功能", "swords")
 
-
 local WeaponList = {
     "G3SG1",
 }
@@ -3366,152 +3365,92 @@ GuardGroup:AddButton({
     DoubleClick = false,
 })
 
-local FireRateGroup = Tabs.guard:AddRightGroupbox("武器射速修改", "gauge")
-
--- 射速输入框
-local fireRateValue = ""
-FireRateGroup:AddInput("FireRateInput", {
-    Text = "射速（发/秒）",
-    Default = "",
-    Placeholder = "如 10 = 每秒10发",
-    Numeric = true,
-    Finished = true,
-    Callback = function(Value)
-        fireRateValue = Value
-        print("[守卫] 输入射速: " .. tostring(Value))
-    end
-})
-
--- 自动射击开关
-local autoFiring = false
-local autoFireConnection = nil
-
-FireRateGroup:AddToggle("AutoFireToggle", {
-    Text = "自动射击",
+GuardGroup:AddToggle("GuardHeadHitbox", {
+    Text = "扩大玩家范围",
     Default = false,
-    Tooltip = "开启后以设定射速自动调用 FiredGunClient 开枪",
-    Callback = function(Value)
-        autoFiring = Value
-
-        if Value then
-            -- 验证
-            local rate = tonumber(fireRateValue)
-            if not rate or rate <= 0 then
-                Library:Notify("请先输入有效的射速值！", 3)
-                return
-            end
-
-            if #selectedWeapons == 0 then
-                Library:Notify("请先在上方下拉框选择武器！", 3)
-                return
-            end
-
-            local interval = 1 / rate
-            local lastFire = 0
-
-            local RunService = game:GetService("RunService")
-            local Players = game:GetService("Players")
-            local ReplicatedStorage = game:GetService("ReplicatedStorage")
-            local ws = game:GetService("Workspace")
-
-            autoFireConnection = RunService.Heartbeat:Connect(function()
-                if not autoFiring then return end
-
-                local now = tick()
-                if now - lastFire < interval then return end
-                lastFire = now
-
-                local lp = Players.LocalPlayer
-                local char = lp.Character
-                if not char then return end
-
-                -- 在角色（已装备）中查找武器
-                local weapon = nil
-                for _, name in ipairs(selectedWeapons) do
-                    weapon = char:FindFirstChild(name)
-                    if weapon then break end
-                end
-
-                -- 角色里没有就找背包
-                if not weapon then
-                    local backpack = lp:FindFirstChild("Backpack")
-                    if backpack then
-                        for _, name in ipairs(selectedWeapons) do
-                            weapon = backpack:FindFirstChild(name)
-                            if weapon then break end
+    Callback = function(state)
+        if not state then
+            -- 关闭时恢复原始大小
+            pcall(function()
+                local live = workspace:FindFirstChild("Live")
+                if live then
+                    for _, model in pairs(live:GetChildren()) do
+                        if model:IsA("Model") then
+                            local head = model:FindFirstChild("Head")
+                            if head and head:IsA("BasePart") then
+                                head.Size = Vector3.new(2, 1, 1)
+                                head.CanCollide = true
+                            end
                         end
-                    end
-                end
-
-                if not weapon then return end
-
-                local camera = ws.CurrentCamera
-                local camCF = camera.CFrame
-                local origin = camCF.Position
-                local lookDir = camCF.LookVector
-
-                -- 射线检测命中目标
-                local rayParams = RaycastParams.new()
-                rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                rayParams.FilterDescendantsInstances = {char}
-
-                local rayResult = ws:Raycast(origin, lookDir * 1000, rayParams)
-
-                local hitInstance = nil
-                local hitPos = origin + lookDir * 1000
-                local hitTargets = {}
-
-                if rayResult then
-                    hitInstance = rayResult.Instance
-                    hitPos = rayResult.Position
-
-                    -- 检查是否命中玩家
-                    local model = rayResult.Instance:FindFirstAncestorOfClass("Model")
-                    if model then
-                        local hitPlayer = Players:GetPlayerFromCharacter(model)
-                        if hitPlayer then
-                            hitTargets[hitPlayer.Name] = rayResult.Instance.Name
-                        end
-                    end
-                end
-
-                -- 构建 FiredGunClient 参数（格式与原版完全一致）
-                local args = {
-                    [1] = weapon,
-                    [2] = {
-                        ["ClientRayNormal"] = Vector3.yAxis,
-                        ["FiredGun"] = true,
-                        ["bulletCF"] = camCF,
-                        ["ClientRayInstance"] = hitInstance,
-                        ["SecondaryHitTargets"] = {},
-                        ["ClientRayPosition"] = origin,
-                        ["HitTargets"] = hitTargets,
-                        ["bulletSizeC"] = Vector3.new(0.01, 0.01, (hitPos - origin).Magnitude),
-                        ["NoMuzzleFX"] = false,
-                        ["FirePosition"] = origin,
-                    }
-                }
-
-                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
-                if remotes then
-                    local firedGun = remotes:FindFirstChild("FiredGunClient")
-                    if firedGun then
-                        firedGun:FireServer(unpack(args))
                     end
                 end
             end)
-
-            Library:Notify(string.format("自动射击开启，射速: %d发/秒", rate), 3)
-        else
-            -- 停止自动射击
-            if autoFireConnection then
-                autoFireConnection:Disconnect()
-                autoFireConnection = nil
-            end
-            Library:Notify("自动射击已关闭", 3)
         end
     end
 })
+
+local HeadSizeSettings = GuardGroup:AddDependencyBox()
+
+HeadSizeSettings:AddSlider('HeadSizeSlider', {
+    Text = "碰撞箱大小",
+    Default = 4,
+    Min = 1,
+    Max = 999,
+    Rounding = 0,
+    Callback = function(Value)
+        if Toggles.GuardHeadHitbox and Toggles.GuardHeadHitbox.Value then
+            pcall(function()
+                local live = workspace:FindFirstChild("Live")
+                if live then
+                    for _, model in pairs(live:GetChildren()) do
+                        if model:IsA("Model") then
+                            local head = model:FindFirstChild("Head")
+                            if head and head:IsA("BasePart") then
+                                head.Size = Vector3.new(Value, Value, Value)
+                                head.CanCollide = false
+                                head.Transparency = 1
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+HeadSizeSettings:SetupDependencies({
+    { Toggles.GuardHeadHitbox, true },
+})
+
+-- 持续监控，防止游戏重置
+task.spawn(function()
+    while task.wait(0.1) do
+        if Toggles.GuardHeadHitbox and Toggles.GuardHeadHitbox.Value then
+            pcall(function()
+                local live = workspace:FindFirstChild("Live")
+                if live then
+                    for _, model in pairs(live:GetChildren()) do
+                        if model:IsA("Model") then
+                            local head = model:FindFirstChild("Head")
+                            if head and head:IsA("BasePart") then
+                                local targetSize = Vector3.new(
+                                    Options.HeadSizeSlider.Value,
+                                    Options.HeadSizeSlider.Value,
+                                    Options.HeadSizeSlider.Value
+                                )
+                                if head.Size ~= targetSize then
+                                    head.Size = targetSize
+                                    head.CanCollide = false
+                                    head.Transparency = 1
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 local MenuGroup = Tabs.Settings:AddLeftGroupbox("菜单")
 MenuGroup:AddToggle("KeybindMenuOpen", {
