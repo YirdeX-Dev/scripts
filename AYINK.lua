@@ -3378,7 +3378,7 @@ GuardGroup:AddButton({
     DoubleClick = false,
 })
 
-local FireRateGroup = Tabs.Guard:AddRightGroupbox("武器射速修改", "gauge")
+local FireRateGroup = Tabs.guard:AddRightGroupbox("武器射速修改", "gauge")
 
 -- 射速输入框
 local fireRateValue = ""
