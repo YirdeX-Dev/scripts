@@ -1,56 +1,45 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local repo = "https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/"
-local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
-local SaveManager = loadstring(game:HttpGet(repo .. "SaveManager.lua"))()
-local ThemeManager = loadstring(game:HttpGet(repo .. "ThemeManager.lua"))()
-
-local Players = game:GetService("Players")
+local Players           = game:GetService("Players")
+local RunService        = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
+local Workspace         = game:GetService("Workspace")
+local UserInputService  = game:GetService("UserInputService")
+local Lighting          = game:GetService("Lighting")
+local CoreGui           = game:GetService("CoreGui")
+local TeleportService   = game:GetService("TeleportService")
+local HttpService       = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character
+
+local repo = "https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/"
+local Library     = loadstring(game:HttpGet(repo .. "Library.lua"))()
+local SaveManager = loadstring(game:HttpGet(repo .. "SaveManager.lua"))()
+local ThemeManager = loadstring(game:HttpGet(repo .. "ThemeManager.lua"))()
 
 Library.ForceCheckbox = false
 Library.ShowToggleFrameInKeybinds = true
 
 local Options = Library.Options
 local Toggles = Library.Toggles
-local A1 = game:GetService("Players")
-local A2 = A1.LocalPlayer
-local A3 = game:GetService("RunService")
-local A4 = game:GetService("Lighting")
-local A5 = game:GetService("CoreGui")
-local A6 = game:GetService("UserInputService")
-local A7 = game:GetService("TeleportService")
-local A8 = workspace
-local A9 = game:GetService("HttpService")
 
 local Window = Library:CreateWindow({
-    Title = "YX-脚本中心",
-    Footer = "脚本中心",
-    Size = UDim2.fromOffset(750, 650),
-    Icon = "rbxassetid://71400987113958", 
+    Title   = "YX-脚本中心",
+    Footer  = "脚本中心",
+    Size    = UDim2.fromOffset(750, 650),
+    Icon    = "rbxassetid://71400987113958",
     AutoShow = true,
     NotifySide = "Right",
     ShowCustomCursor = true,
     IconSize = UDim2.fromOffset(35, 35),
     Resizable = true,
-    BackgroundImage = "rbxassetid://123887383447725",--这里改你的图片背景
-	BackgroundTransparency = 0.3, 
-	BackgroundColor = Color3.fromRGB(0, 0, 0),
-
+    BackgroundImage = "rbxassetid://123887383447725",
+    BackgroundTransparency = 0.3,
+    BackgroundColor = Color3.fromRGB(0, 0, 0),
     MobileButtonsSide = "Left",
     DisableSearch = false,
     SearchbarSize = UDim2.new(0.8, 0, 1, 0),
     GlobalSearch = false,
-    
     Position = UDim2.fromOffset(100, 100),
     Center = true,
-    
     EnableSidebarResize = true,
     EnableCompacting = true,
     SidebarCompacted = false,
@@ -62,12 +51,13 @@ if Window and Window.TitleLabel then
 end
 
 local Tabs = {
-    Main = Window:AddTab("玩家通用", "user"),
+    Main         = Window:AddTab("玩家通用", "user"),
     ScriptCenter = Window:AddTab("脚本中心", "code"),
-    Afhubyyds = Window:AddTab("付费功能", "star"),
-    YXIKB = Window:AddTab("YX加载", "menu"),    
-    Settings = Window:AddTab("设置", "settings"),
+    Afhubyyds    = Window:AddTab("付费功能", "star"),
+    YXIKB        = Window:AddTab("YX加载", "menu"),
+    Settings     = Window:AddTab("设置", "settings"),
 }
+
 local scriptCategories = {
     {
         GroupName = "各大脚本",
@@ -130,7 +120,7 @@ local scriptCategories = {
         GroupName = "墨水游戏",
         List = {
             {Name = "AX-有芙同享汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/ax%E8%84%9A%E6%9C%AC%E7%A7%8B%E8%BE%9E%E6%B1%89%E5%8C%96"},
-            {Name = "HSX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/HSX%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F"},   
+            {Name = "HSX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/HSX%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F"},
             {Name = "墨水Ringta汉化", Url = "https://raw.githubusercontent.com/hdjsjjdgrhj/script-hub/refs/heads/main/Ringta"},
             {Name = "Unm汉化，卡密ink50", Url = "https://raw.githubusercontent.com/Youfutongxiang1/unm-CN/refs/heads/main/README.md"},
         }
@@ -257,57 +247,65 @@ local scriptCategories = {
     },
 }
 
--- ============= 创建脚本按钮函数 =============
 local function CreateScriptButton(group, scriptName, scriptUrl)
-    local btn = group:AddButton({
+    group:AddButton({
         Text = scriptName,
         Func = function()
             Library:Notify("YX正在努力加载: " .. scriptName, 3)
-            local success, result = pcall(function()
-                loadstring(game:HttpGet(scriptUrl))()
+
+            -- 第一步：尝试下载脚本源码
+            local httpOk, httpResult = pcall(function()
+                return game:HttpGet(scriptUrl)
             end)
-            if success then
-                Library:Notify("脚本加载成功: " .. scriptName, 3)
+
+            if not httpOk or not httpResult or httpResult == "" then
+                Library:Notify("【" .. scriptName .. "】下载失败，可能链接已失效", 5)
+                return
+            end
+
+            -- 第二步：尝试编译并执行
+            local loadOk, loadFunc = pcall(loadstring, httpResult)
+            if not loadOk or type(loadFunc) ~= "function" then
+                Library:Notify("【" .. scriptName .. "】编译失败，脚本格式有误", 5)
+                return
+            end
+
+            local execOk, execErr = pcall(loadFunc)
+            if execOk then
+                Library:Notify("【" .. scriptName .. "】加载成功!", 3)
             else
-                Library:Notify("加载失败: " .. tostring(result), 5)
+                -- 截取错误信息前80字符，避免通知过长
+                local errShort = tostring(execErr):sub(1, 80)
+                Library:Notify("【" .. scriptName .. "】执行失败: " .. errShort, 6)
+                warn("[YX脚本中心] " .. scriptName .. " 执行失败:\n" .. tostring(execErr))
             end
         end,
         DoubleClick = false,
     })
-    return btn
 end
 
--- ============= 往一个GroupBox里添加多个分类 =============
 local function AddCategoriesToGroup(group, categories)
-    for idx, category in ipairs(categories) do
-        -- 分类名用 Label 显示
+    for _, category in ipairs(categories) do
         group:AddLabel("【" .. category.GroupName .. "】")
         group:AddDivider()
-        
-        -- 每个脚本一个按钮
+
         for _, script in ipairs(category.List) do
             CreateScriptButton(group, script.Name, script.Url)
         end
     end
 end
 
--- ============= 构建脚本中心（4个GroupBox：左2右2） =============
 local function BuildScriptCenter()
-    -- 4个分组框
-    local ScriptCenterLeftGroup = Tabs.ScriptCenter:AddLeftGroupbox("脚本中心1", "code")
+    local ScriptCenterLeftGroup  = Tabs.ScriptCenter:AddLeftGroupbox("脚本中心1", "code")
     local ScriptCenterRightGroup = Tabs.ScriptCenter:AddRightGroupbox("脚本中心2", "code")
     local ScriptCenterLeftGroup1 = Tabs.ScriptCenter:AddLeftGroupbox("脚本中心3", "code")
     local ScriptCenterRightGroup1 = Tabs.ScriptCenter:AddRightGroupbox("脚本中心4", "code")
-    
+
     local totalCategories = #scriptCategories
     local perGroup = math.ceil(totalCategories / 4)
-    
-    -- 计算每个框放哪些分类
-    local group1Cats = {} -- 左上
-    local group2Cats = {} -- 右上
-    local group3Cats = {} -- 左下
-    local group4Cats = {} -- 右下
-    
+
+    local group1Cats, group2Cats, group3Cats, group4Cats = {}, {}, {}, {}
+
     for i = 1, totalCategories do
         if i <= perGroup then
             table.insert(group1Cats, scriptCategories[i])
@@ -319,27 +317,19 @@ local function BuildScriptCenter()
             table.insert(group4Cats, scriptCategories[i])
         end
     end
-    
-    -- 添加到各个GroupBox
+
     AddCategoriesToGroup(ScriptCenterLeftGroup, group1Cats)
     AddCategoriesToGroup(ScriptCenterRightGroup, group2Cats)
     AddCategoriesToGroup(ScriptCenterLeftGroup1, group3Cats)
     AddCategoriesToGroup(ScriptCenterRightGroup1, group4Cats)
-    
+
     -- 统计信息
     local totalScripts = 0
     for _, cat in ipairs(scriptCategories) do
         totalScripts += #cat.List
     end
-    
-    Library:Notify("脚本中心加载完成!", 3)
-    local beforeCompCount = 0
-    local beforeCompScripts = 0
-    for i, cat in ipairs(scriptCategories) do
-        if cat.GroupName == "竞争对手" then break end
-        beforeCompCount += 1
-        beforeCompScripts += #cat.List
-    end
+
+    Library:Notify(string.format("脚本中心加载完成! 共%d个分类, %d个脚本", totalCategories, totalScripts), 4)
 end
 
 BuildScriptCenter()
