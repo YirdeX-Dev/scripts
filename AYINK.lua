@@ -1947,49 +1947,86 @@ meun:AddToggle('AutoQTE', {
         end
     end
 })
+local RotationSpeed = 5
+local RotationActive = false
+local RotationConnection = nil
 
-meun:AddToggle("EnableFOV", {
-    Text = "超广角",
+meun:AddToggle("PlayerRotation", {
+    Text = "人物旋转",
     Default = false,
-    Callback = function(state)
-        if not state then
-            pcall(function()
-                workspace.CurrentCamera.FieldOfView = 70
+    Callback = function(State)
+        SaveFunctionState("PlayerRotation", State)
+        RotationActive = State
+        if State then
+            if RotationConnection then RotationConnection:Disconnect() end
+            local angle = 0
+            RotationConnection = RunService.RenderStepped:Connect(function()
+                if not RotationActive then
+                    RotationConnection:Disconnect()
+                    RotationConnection = nil
+                    return
+                end
+                local char = LocalPlayer.Character
+                if char then
+                    local hrp = char:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        angle = angle + (RotationSpeed * 0.1)
+                        local pos = hrp.Position
+                        hrp.CFrame = CFrame.new(pos) * CFrame.Angles(0, angle, 0)
+                    end
+                end
             end)
+        else
+            if RotationConnection then
+                RotationConnection:Disconnect()
+                RotationConnection = nil
+            end
         end
     end
 })
-local FOVSettings = meun:AddDependencyBox()
 
-FOVSettings:AddSlider('UltraWideSlider', {
-    Text = "视角距离",
-    Default = 70,
-    Min = 0,
-    Max = 120,
-    Rounding = 0,
-    Suffix = "°",
+meun:AddSlider("RotationSpeed", {
+    Text = "旋转速度",
+    Min = 1,
+    Max = 20,
+    Default = 5,
     Callback = function(Value)
-        if Toggles.EnableFOV and Toggles.EnableFOV.Value then
-            pcall(function()
-                workspace.CurrentCamera.FieldOfView = Value
-            end)
+        RotationSpeed = Value
+    end
+})
+local OriginalLighting = {}
+meun:AddToggle('NoToggle', {
+    Text = "高亮",
+    Default = false,
+    Callback = function(State)
+        SaveFunctionState("BrightnessBoost", State)
+        if State then
+            OriginalLighting = {
+                Brightness = Lighting.Brightness,
+                Ambient = Lighting.Ambient,
+                OutdoorAmbient = Lighting.OutdoorAmbient,
+                FogEnd = Lighting.FogEnd,
+                ClockTime = Lighting.ClockTime,
+                ExposureCompensation = Lighting.ExposureCompensation
+            }
+            Lighting.Brightness = 3
+            Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+            Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+            Lighting.FogEnd = 100000
+            Lighting.ClockTime = 14
+            Lighting.ExposureCompensation = 1
+        else
+            if OriginalLighting.Brightness then
+                Lighting.Brightness = OriginalLighting.Brightness
+                Lighting.Ambient = OriginalLighting.Ambient
+                Lighting.OutdoorAmbient = OriginalLighting.OutdoorAmbient
+                Lighting.FogEnd = OriginalLighting.FogEnd
+                Lighting.ClockTime = OriginalLighting.ClockTime
+                Lighting.ExposureCompensation = OriginalLighting.ExposureCompensation
+            end
         end
     end
 })
-
-FOVSettings:SetupDependencies({
-    { Toggles.EnableFOV, true },
-})
-
-task.spawn(function()
-    while task.wait(0.05) do
-        if Toggles.EnableFOV and Toggles.EnableFOV.Value then
-            pcall(function()
-                workspace.CurrentCamera.FieldOfView = Options.UltraWideSlider.Value
-            end)
-        end
-    end
-end)
 meun:AddToggle('NoCooldownToggle', {
     Text = '无后摇',
     Default = false,
@@ -2416,106 +2453,6 @@ Csgn:AddButton("刷新玩家列表", function()
     end
     PlayerDropdown:Refresh(NewNames)
 end)
-ControlGroup:AddToggle('RotateToggle', {
-    Text = '启用旋转',
-    Default = false,
-    Tooltip = '开启/关闭人物旋转功能',
-    Callback = function(Value)
-        toggleRotate(Value)
-    end
-})
-ControlGroup:AddSlider('SpeedSlider', {
-    Text = '旋转速度',
-    Default = 7200,
-    Min = 100,
-    Max = 36000,
-    Rounding = 0,
-    Suffix = " °/秒",
-    Tooltip = '设置旋转速度（度/秒）\n建议范围：1000-20000',
-    Callback = function(Value)
-        Settings.RotationSpeed = Value
-        if Settings.Rotating then
-            Library:Notify("速度已更新: " .. Value .. "°/s", 1)
-        end
-    end
-})
-local Settings = {
-    Rotating = false,
-    RotationSpeed = 7200,
-    RotationDirection = 1,
-}
-
-local RotateConnection = nil
-local LocalPlayer = game:GetService("Players").LocalPlayer
-
-local function startRotate()
-    if Settings.Rotating then return end
-    
-    local char = LocalPlayer.Character
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    if not root then
-        Library:Notify("请先进入游戏", 2)
-        return
-    end
-    
-    Settings.Rotating = true
-    RotateConnection = game:GetService("RunService").RenderStepped:Connect(function(dt)
-        local currentRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if currentRoot then
-            local speedRad = math.rad(Settings.RotationSpeed) * Settings.RotationDirection
-            currentRoot.CFrame = currentRoot.CFrame * CFrame.Angles(0, speedRad * dt, 0)
-        end
-    end)
-    
-    Library:Notify("旋转已开启 (速度: " .. Settings.RotationSpeed .. "°/s)", 2)
-end
-
-local function stopRotate()
-    Settings.Rotating = false
-    if RotateConnection then
-        RotateConnection:Disconnect()
-        RotateConnection = nil
-    end
-    Library:Notify("旋转已关闭", 1)
-end
-
-local function toggleRotate(value)
-    if value then
-        startRotate()
-    else
-        stopRotate()
-    end
-end
-
-local function setDirection(value)
-    Settings.RotationDirection = value
-    Library:Notify("旋转方向: " .. (value == 1 and "顺时针" or "逆时针"), 1)
-end
-ControlGroup:AddDropdown('DirectionDropdown', {
-    Text = '旋转方向',
-    Values = {'顺时针', '逆时针'},
-    Default = 1,
-    Tooltip = '选择旋转方向',
-    Callback = function(Value)
-        if Value == '顺时针' then
-            setDirection(1)
-        else
-            setDirection(-1)
-        end
-    end
-})
-ControlGroup:AddButton({
-    Text = '切换方向',
-    Func = function()
-        if Settings.RotationDirection == 1 then
-            setDirection(-1)
-            Options.DirectionDropdown:SetValue('逆时针')
-        else
-            setDirection(1)
-            Options.DirectionDropdown:SetValue('顺时针')
-        end
-    end
-})
 Owner:AddToggle("FakeVIP", {
     Text = "VIP",
     Default = false,
@@ -2692,7 +2629,7 @@ Boots:AddInput("WonInput", {
 })
 
 Wptj:AddInput('CustomTitleInput', {
-    Default = 'AY Hub',
+    Default = '随便输一个',
     Numeric = false,
     Finished = true,
     Text = '自定义头衔文本',
@@ -3323,6 +3260,268 @@ Players2:AddButton({
                 LabelRobux:SetText("捐赠Robux: 未选择")
             end
         end)
+    end
+})
+
+local GuardGroup = Tabs.guard:AddLeftGroupbox("守卫功能", "swords")
+
+
+local WeaponList = {
+    "G3SG1",
+}
+
+-- 存储选中的武器
+local selectedWeapons = {}
+
+-- 多选下拉框（无默认选择）
+GuardGroup:AddDropdown("WeaponSelect", {
+    Text = "选择武器",
+    Values = WeaponList,
+    Default = {},
+    Multi = true,
+    Tooltip = "可多选要修改子弹的武器",
+    Callback = function(Value)
+        selectedWeapons = {}
+        for name, enabled in pairs(Value) do
+            if enabled then
+                table.insert(selectedWeapons, name)
+            end
+        end
+        print("[守卫] 已选武器数量: " .. #selectedWeapons)
+    end
+})
+
+-- 子弹数量输入框
+local bulletInputValue = ""
+GuardGroup:AddInput("BulletCountInput", {
+    Text = "子弹数量",
+    Default = "",
+    Placeholder = "输入子弹数量",
+    Numeric = true,
+    Finished = true,
+    Callback = function(Value)
+        bulletInputValue = Value
+        print("[守卫] 输入子弹数量: " .. tostring(Value))
+    end
+})
+
+GuardGroup:AddButton({
+    Text = "确定修改",
+    Tooltip = "修改选中武器的子弹数量",
+    Func = function()
+        local bulletCount = tonumber(bulletInputValue)
+
+        if not bulletCount or bulletCount < 0 then
+            Library:Notify("请输入有效的子弹数量！", 3)
+            return
+        end
+
+        if #selectedWeapons == 0 then
+            Library:Notify("请先选择至少一把武器！", 3)
+            return
+        end
+
+        local lp = game:GetService("Players").LocalPlayer
+        local backpack = lp:FindFirstChild("Backpack")
+        if not backpack then
+            Library:Notify("未找到背包！", 3)
+            return
+        end
+
+        local successCount = 0
+        local partialCount = 0
+        local failCount = 0
+
+        for _, weaponName in ipairs(selectedWeapons) do
+            local weapon = backpack:FindFirstChild(weaponName)
+            if weapon then
+                local infoModified = false
+                local infoClientModified = false
+
+                -- 同时修改 Info.Bullets 和 InfoClient.Bullets
+                local info = weapon:FindFirstChild("Info")
+                if info and info:FindFirstChild("Bullets") then
+                    info.Bullets.Value = bulletCount
+                    infoModified = true
+                end
+
+                local infoClient = weapon:FindFirstChild("InfoClient")
+                if infoClient and infoClient:FindFirstChild("Bullets") then
+                    infoClient.Bullets.Value = bulletCount
+                    infoClientModified = true
+                end
+
+                -- 两个路径全部同时修改才算成功
+                if infoModified and infoClientModified then
+                    successCount = successCount + 1
+                elseif infoModified or infoClientModified then
+                    partialCount = partialCount + 1
+                else
+                    failCount = failCount + 1
+                end
+            else
+                failCount = failCount + 1
+                print("[守卫] 未在背包中找到武器: " .. weaponName)
+            end
+        end
+
+        if successCount > 0 then
+            Library:Notify(string.format("成功修改 %d 把武器的子弹为 %d（两个路径全部修改）", successCount, bulletCount), 3)
+        end
+        if partialCount > 0 then
+            Library:Notify(string.format("%d 把武器仅修改了一个路径（Info或InfoClient缺失）", partialCount), 3)
+        end
+        if failCount > 0 then
+            Library:Notify(string.format("%d 把武器修改失败（未找到或无Bullets）", failCount), 3)
+        end
+    end,
+    DoubleClick = false,
+})
+
+local FireRateGroup = Tabs.Guard:AddRightGroupbox("武器射速修改", "gauge")
+
+-- 射速输入框
+local fireRateValue = ""
+FireRateGroup:AddInput("FireRateInput", {
+    Text = "射速（发/秒）",
+    Default = "",
+    Placeholder = "如 10 = 每秒10发",
+    Numeric = true,
+    Finished = true,
+    Callback = function(Value)
+        fireRateValue = Value
+        print("[守卫] 输入射速: " .. tostring(Value))
+    end
+})
+
+-- 自动射击开关
+local autoFiring = false
+local autoFireConnection = nil
+
+FireRateGroup:AddToggle("AutoFireToggle", {
+    Text = "自动射击",
+    Default = false,
+    Tooltip = "开启后以设定射速自动调用 FiredGunClient 开枪",
+    Callback = function(Value)
+        autoFiring = Value
+
+        if Value then
+            -- 验证
+            local rate = tonumber(fireRateValue)
+            if not rate or rate <= 0 then
+                Library:Notify("请先输入有效的射速值！", 3)
+                return
+            end
+
+            if #selectedWeapons == 0 then
+                Library:Notify("请先在上方下拉框选择武器！", 3)
+                return
+            end
+
+            local interval = 1 / rate
+            local lastFire = 0
+
+            local RunService = game:GetService("RunService")
+            local Players = game:GetService("Players")
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local ws = game:GetService("Workspace")
+
+            autoFireConnection = RunService.Heartbeat:Connect(function()
+                if not autoFiring then return end
+
+                local now = tick()
+                if now - lastFire < interval then return end
+                lastFire = now
+
+                local lp = Players.LocalPlayer
+                local char = lp.Character
+                if not char then return end
+
+                -- 在角色（已装备）中查找武器
+                local weapon = nil
+                for _, name in ipairs(selectedWeapons) do
+                    weapon = char:FindFirstChild(name)
+                    if weapon then break end
+                end
+
+                -- 角色里没有就找背包
+                if not weapon then
+                    local backpack = lp:FindFirstChild("Backpack")
+                    if backpack then
+                        for _, name in ipairs(selectedWeapons) do
+                            weapon = backpack:FindFirstChild(name)
+                            if weapon then break end
+                        end
+                    end
+                end
+
+                if not weapon then return end
+
+                local camera = ws.CurrentCamera
+                local camCF = camera.CFrame
+                local origin = camCF.Position
+                local lookDir = camCF.LookVector
+
+                -- 射线检测命中目标
+                local rayParams = RaycastParams.new()
+                rayParams.FilterType = Enum.RaycastFilterType.Exclude
+                rayParams.FilterDescendantsInstances = {char}
+
+                local rayResult = ws:Raycast(origin, lookDir * 1000, rayParams)
+
+                local hitInstance = nil
+                local hitPos = origin + lookDir * 1000
+                local hitTargets = {}
+
+                if rayResult then
+                    hitInstance = rayResult.Instance
+                    hitPos = rayResult.Position
+
+                    -- 检查是否命中玩家
+                    local model = rayResult.Instance:FindFirstAncestorOfClass("Model")
+                    if model then
+                        local hitPlayer = Players:GetPlayerFromCharacter(model)
+                        if hitPlayer then
+                            hitTargets[hitPlayer.Name] = rayResult.Instance.Name
+                        end
+                    end
+                end
+
+                -- 构建 FiredGunClient 参数（格式与原版完全一致）
+                local args = {
+                    [1] = weapon,
+                    [2] = {
+                        ["ClientRayNormal"] = Vector3.yAxis,
+                        ["FiredGun"] = true,
+                        ["bulletCF"] = camCF,
+                        ["ClientRayInstance"] = hitInstance,
+                        ["SecondaryHitTargets"] = {},
+                        ["ClientRayPosition"] = origin,
+                        ["HitTargets"] = hitTargets,
+                        ["bulletSizeC"] = Vector3.new(0.01, 0.01, (hitPos - origin).Magnitude),
+                        ["NoMuzzleFX"] = false,
+                        ["FirePosition"] = origin,
+                    }
+                }
+
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                if remotes then
+                    local firedGun = remotes:FindFirstChild("FiredGunClient")
+                    if firedGun then
+                        firedGun:FireServer(unpack(args))
+                    end
+                end
+            end)
+
+            Library:Notify(string.format("自动射击开启，射速: %d发/秒", rate), 3)
+        else
+            -- 停止自动射击
+            if autoFireConnection then
+                autoFireConnection:Disconnect()
+                autoFireConnection = nil
+            end
+            Library:Notify("自动射击已关闭", 3)
+        end
     end
 })
 
