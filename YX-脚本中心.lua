@@ -10,13 +10,12 @@ local HttpService       = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 
--- A系列别名（兼容旧代码）
-local A1 = Players           -- A1 = Players
-local A2 = LocalPlayer       -- A2 = LocalPlayer
-local A3 = RunService        -- A3 = RunService
-local A6 = UserInputService  -- A6 = UserInputService
-local A7 = TeleportService   -- A7 = TeleportService
-local A8 = Workspace         -- A8 = Workspace
+local A1 = Players
+local A2 = LocalPlayer
+local A3 = RunService
+local A6 = UserInputService
+local A7 = TeleportService
+local A8 = Workspace
 
 local repo = "https://raw.githubusercontent.com/YirdeX-Dev/obsidian_UI/refs/heads/main/"
 local Library     = loadstring(game:HttpGet(repo .. "Library.lua"))()
@@ -39,7 +38,6 @@ local Window = Library:CreateWindow({
     ShowCustomCursor = true,
     IconSize = UDim2.fromOffset(35, 35),
     Resizable = true,
-    BackgroundImage = "rbxassetid://123887383447725",
     BackgroundTransparency = 0.3,
     BackgroundColor = Color3.fromRGB(0, 0, 0),
     MobileButtonsSide = "Left",
@@ -130,7 +128,6 @@ local scriptCategories = {
             {Name = "AX-有芙同享汉化", Url = "https://raw.githubusercontent.com/fningna51-stack/-/main/ax%E8%84%9A%E6%9C%AC%E7%A7%8B%E8%BE%9E%E6%B1%89%E5%8C%96"},
             {Name = "HSX汉化脚本", Url = "https://raw.githubusercontent.com/YirdeX-Dev/China/refs/heads/main/HSX%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F"},
             {Name = "墨水Ringta汉化", Url = "https://raw.githubusercontent.com/hdjsjjdgrhj/script-hub/refs/heads/main/Ringta"},
-            {Name = "Unm汉化，卡密ink50", Url = "https://raw.githubusercontent.com/Youfutongxiang1/unm-CN/refs/heads/main/README.md"},
         }
     },
     {
